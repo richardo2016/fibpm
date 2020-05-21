@@ -3,7 +3,7 @@
 declare namespace FxLibNS {
 }
 
-declare module "@fibjs-mono-starter/starter" {
+declare module "fpm" {
     var mod: any
     export = mod
 }

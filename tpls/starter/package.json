@@ -1,14 +1,14 @@
 {
-  "name": "<%= pkg.name %>",
+  "name": "<%= pkg.npm_name %>",
   "version": "0.1.0",
   "description": "",
   "main": "lib",
   "types": "@types/index.d.ts",
   "repository": {
     "type": "https",
-    "url": "https://github.com/<%= pkg.git_group_name %>/<%= pkg.mono_path %>"
+    "url": "https://github.com/<%= pkg.git_path %>/packages/<%= pkg.name %>"
   },
-  "homepage": "https://github.com/<%= pkg.git_group_name %>/<%= pkg.mono_path %>",
+  "homepage": "https://github.com/<%= pkg.git_path %>/packages/<%= pkg.name %>",
   "scripts": {
     "build": "fib-typify ./src -o ./lib",
     "test": "fibjs test",

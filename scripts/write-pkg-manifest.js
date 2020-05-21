@@ -66,7 +66,7 @@ packages.forEach(({
 
     let output = ejs.render(source, {
       pkg: {
-        name: `${scopePrefix}/${comPkgname}`,
+        name: comPkgname,
         npm_name: `${scopePrefix}/${comPkgname}`,
         git_path: monoInfo.gitPath || `${monoscope}/${monoName}`,
         mono_path: `packages/${comPkgname}`,

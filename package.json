@@ -1,6 +1,6 @@
 {
   "name": "fibjs-mono-starter",
-  "monoscope": "fibjs-monogroup",
+  "monoscope": "fli",
   "private": true,
   "scripts": {
     "build": "lerna run build",
