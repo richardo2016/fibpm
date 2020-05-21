@@ -1,10 +1,10 @@
-## @fli/cli
+## @coli/cli
 
 ## Introduction
 
 `@fxjs/cli` is a fibjs Cli builder, almost migration of [cac.js] from node.js to fibjs.
 
-`@fli/cli` is migrated from @fxjs/cli and as basis part of `@fli/*` family tools. So I dont ensure `@fli/cli` could always keep same features with [cac.js] or [@fxjs/cli], and it could break as it's for internal usage for other `@fli/*` packages.
+`@coli/cli` is migrated from @fxjs/cli and as basis part of `@coli/*` family tools. So I dont ensure `@coli/cli` could always keep same features with [cac.js] or [@fxjs/cli], and it could break as it's for internal usage for other `@coli/*` packages.
 
 ## Features
 
@@ -35,7 +35,7 @@
   - [With Deno](#with-deno)
 - [References](#references)
   - [CLI Instance](#cli-instance)
-    - [@fli/cli(name?)](#flicliname)
+    - [@coli/cli(name?)](#flicliname)
     - [cli.command(name, description, config?)](#clicommandname-description-config)
     - [cli.option(name, description, config?)](#clioptionname-description-config)
     - [cli.parse(argv?)](#cliparseargv)
@@ -60,9 +60,9 @@
 ## Install
 
 ```bash
-npm i -S @fli/cli
+npm i -S @coli/cli
 # or
-fibjs --install @fli/cli
+fibjs --install @coli/cli
 ```
 
 ## Usage
@@ -73,7 +73,7 @@ Use FCli as simple argument parser:
 
 ```js
 // examples/basic-usage.js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli.option('--type <type>', 'Choose a project type', {
   default: 'node'
@@ -90,7 +90,7 @@ console.dir(parsed)
 
 ```js
 // examples/help.js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli.option('--type [type]', 'Choose a project type', {
   default: 'node'
@@ -117,7 +117,7 @@ cli.parse()
 You can attach options to a command.
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli
   .command('rm <dir>', 'Remove a dir')
@@ -142,7 +142,7 @@ When using brackets in command name, angled brackets indicate required command a
 When using brackets in option name, angled brackets indicate that a string / number value is required, while square bracket indicate that the value can also be `true`.
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli
   .command('deploy <folder>', 'Deploy a folder to AWS')
@@ -177,7 +177,7 @@ This will let FCli set the default value of `config` to true, and you can use `-
 The last argument of a command can be rest, and only the last argument. To make an argument rest you have to add `...` to the start of argument name, just like the rest operator in JavaScript. Here is an example:
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli
   .command('build <entry> [...otherFiles]', 'Build your app')
@@ -200,7 +200,7 @@ cli.parse()
 Dot-style options will be merged into a single option.
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli
   .command('build', 'desc')
@@ -222,7 +222,7 @@ cli.parse()
 Register a command that will be used when no other command is matched.
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 
 cli
   // Simply omit the command name, just brackets
@@ -252,13 +252,13 @@ node cli.js --include project-a --include project-b
 
 ### CLI Instance
 
-CLI instance is created by invoking the `@fli/cli` function:
+CLI instance is created by invoking the `@coli/cli` function:
 
 ```js
-const cli = require('@fli/cli')()
+const cli = require('@coli/cli')()
 ```
 
-#### @fli/cli(name?)
+#### @coli/cli(name?)
 
 Create a CLI instance, optionally specify the program name which will be used to display in help and version message. When not set we use the basename of `argv[1]`.
 
@@ -408,7 +408,7 @@ cli.on('command:*', () => {
 
 ### Why not cac.js directly?
 
-**@fli/cli** is inspired by [cac.js]
+**@coli/cli** is inspired by [cac.js]
 
 [cac.js] is one lightweight, fast cli builder for node.js/deno app, [egoist], author of [cac.js], were managed to make convenient and elegant tool for javascript ecosystem.
 
@@ -416,7 +416,7 @@ In fact, I trid to make PR to [cac.js] to make it support fibjs, in a way, it's 
 
 But there's some typically better APIs in fibjs that cac.js cannot use --- if do so, [cac.js]'s source code would contains many fibjs-only codes, useless for node.js/deno, that would mutilate elegant structure of [cac.js]
 
-The 2nd best, I copid test cases and examples from [cac.js] as initial test case as **@fli/cli**, then I reimplement almost features of [cac.js] and add some fibjs specific features in **@fli/cli**. 
+The 2nd best, I copid test cases and examples from [cac.js] as initial test case as **@coli/cli**, then I reimplement almost features of [cac.js] and add some fibjs specific features in **@coli/cli**. 
 
 Thx much to [egoist] and other contributors' of [cac.js] :)
 
