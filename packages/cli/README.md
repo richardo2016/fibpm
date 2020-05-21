@@ -1,11 +1,10 @@
-## @fibjs-mono-starter/cli
-
-[![NPM version](https://img.shields.io/npm/v/@fibjs-mono-starter/cli.svg)](https://www.npmjs.org/package/@fibjs-mono-starter/cli)
-[![Build Status](https://travis-ci.org/fibjs-mono-starter/fibjs-mono-starter.svg)](https://travis-ci.org/fibjs-mono-starter/fibjs-mono-starter)
+## @fli/cli
 
 ## Introduction
 
-**FCli** is a fibjs Cli builder, almost migration of [cac.js] from node.js to fibjs
+`@fxjs/cli` is a fibjs Cli builder, almost migration of [cac.js] from node.js to fibjs.
+
+`@fli/cli` is migrated from @fxjs/cli and as basis part of `@fli/*` family tools. So I dont ensure `@fli/cli` could always keep same features with [cac.js] or [@fxjs/cli], and it could break as it's for internal usage for other `@fli/*` packages.
 
 ## Features
 
@@ -13,7 +12,7 @@
 - **Easy to learn**. There're only 4 APIs you need to learn for building simple CLIs: `cli.option` `cli.version` `cli.help` `cli.parse`.
 - **utility features**. Enable features like
   - default command
-  - **git-like** subcommands
+  - **git-style** subcommands
   - validation for required arguments and options
   - rest arguments
   - dot-nested options, automated help message generation and so on.
