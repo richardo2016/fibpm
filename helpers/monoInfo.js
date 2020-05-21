@@ -1,9 +1,12 @@
 const monoPkgJson = require('../package.json')
 
+const monoSettings = monoPkgJson.mono || {};
+const monoScope = monoSettings.scope || monoPkgJson.monoscope || monoPkgJson.name
+
 module.exports = {
-    monoName: monoPkgJson.name,
-    monoScope: monoPkgJson.monoscope || monoPkgJson.name,
+    monoName: monoSettings.name || monoPkgJson.name,
+    monoScope: monoScope,
     monoPkgJson: monoPkgJson,
-    gitPath: monoPkgJson.git_path || `${monoPkgJson.name || monoPkgJson.monoscope}/${monoPkgJson.name}`,
-    scopePrefix: `@${monoPkgJson.name || monoPkgJson.monoscope}`,
+    gitPath: monoSettings.git_path || `${monoPkgJson.name}/${monoPkgJson.name}`,
+    scopePrefix: `@${monoScope}`,
 }

@@ -1,14 +1,14 @@
 {
-	"name": "@fibjs-mono-starter/imodule-common",
+	"name": "@fli/imodule-common",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "@types/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/imodule-common"
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/imodule-common"
 	},
-	"homepage": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/imodule-common",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/imodule-common",
 	"scripts": {
 		"build": "fib-typify ./src -o ./lib",
 		"test": "fibjs test",

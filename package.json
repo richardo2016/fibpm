@@ -1,6 +1,9 @@
 {
-  "name": "fibjs-mono-starter",
-  "monoscope": "fli",
+  "name": "fibjs-cli",
+  "mono": {
+    "scope": "fli",
+    "git_path": "richardo2016/fibjs-cli"
+  },
   "private": true,
   "scripts": {
     "build": "lerna run build",

@@ -1,14 +1,14 @@
 {
-	"name": "@fibjs-mono-starter/fpm",
+	"name": "@fli/fpm",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "@types/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/fpm"
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/fpm"
 	},
-	"homepage": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/fpm",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/fpm",
 	"scripts": {
 		"build": "fib-typify ./src -o ./lib",
 		"test": "fibjs test",

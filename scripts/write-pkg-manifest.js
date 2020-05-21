@@ -68,6 +68,7 @@ packages.forEach(({
       pkg: {
         name: comPkgname,
         npm_name: `${scopePrefix}/${comPkgname}`,
+        git_group: monoInfo.monoscope,
         git_path: monoInfo.gitPath || `${monoscope}/${monoName}`,
         mono_path: `packages/${comPkgname}`,
       }

@@ -1,12 +1,15 @@
-const test = require('test');
-test.setup();
+const test = require('test')
+test.setup()
 
-const Mod = require('../')
+require('./unit/utils.scan')
+require('./unit/utils.bracket')
 
-describe("FxLib", () => {
-    it("basic", () => {
-        assert.ok(Mod.default === null)
-    });
-});
+require('./unit/option')
 
-test.run(console.DEBUG);
+require('./unit/command')
+
+require('./unit/cli')
+
+require('./integrations/examples')
+
+test.run(console.DEBUG)

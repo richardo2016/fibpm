@@ -1,14 +1,14 @@
 {
-	"name": "@fibjs-mono-starter/cli",
+	"name": "@fli/cli",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "@types/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/cli"
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/cli"
 	},
-	"homepage": "https://github.com/fibjs-mono-starter/fibjs-mono-starter/packages/cli",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/cli",
 	"scripts": {
 		"build": "fib-typify ./src -o ./lib",
 		"test": "fibjs test",
