@@ -10,11 +10,13 @@
             "es2015",
             "es2016"
         ],
+        "declaration": true,
+        "declarationDir": "typings",
         "types": [
             "@fibjs/types"
         ],
         "typeRoots": [
-            "@types/index.d.ts"
+            "typings/index.d.ts"
         ]
     }
 }

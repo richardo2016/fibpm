@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
-	"types": "@types/index.d.ts",
+	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
 		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-user-profile"

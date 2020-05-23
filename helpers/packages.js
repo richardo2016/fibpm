@@ -12,8 +12,8 @@ module.exports = [
         pkgname: 'i-user-profile',
     },
     {
-        name: 'i-registry',
-        pkgname: 'i-registry',
+        name: 'i-resolve-registry',
+        pkgname: 'i-resolve-registry',
     },
     /* internal module :start */
     {

@@ -1,14 +1,14 @@
 {
-	"name": "@coli/i-registry",
+	"name": "@coli/i-resolve-registry",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
-	"types": "@types/index.d.ts",
+	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-registry"
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-registry"
 	},
-	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/i-registry",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-registry",
 	"scripts": {
 		"build": "fib-typify ./src -o ./lib",
 		"test": "fibjs test",
