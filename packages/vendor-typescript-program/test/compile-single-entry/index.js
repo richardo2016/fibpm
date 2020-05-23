@@ -33,6 +33,23 @@ describe('TsProgram.compile - single entry', () => {
         )
 
         assert.ok(emitResult.emitSkipped)
+        assert.isUndefined(emitResult.emittedFiles)
+    });
+
+    it("with-error", () => {
+        const emitResult = TsProgram.compile(
+            [
+                path.resolve(UnitTestDir, './with-error/ts.dir/index.ts')
+            ],
+            {
+                noEmit: true,
+                noImplicitAny: true,
+                target: ts.ScriptTarget.ES6,
+                module: ts.ModuleKind.CommonJS,
+            }
+        )
+
+        assert.ok(emitResult.emitSkipped)
     });
 
     it("emit declaration", () => {
@@ -63,6 +80,7 @@ describe('TsProgram.compile - single entry', () => {
         )
 
         assert.isFalse(emitResult.emitSkipped)
+        assert.isUndefined(emitResult.emittedFiles)
     });
 
     it("emit declaration only", () => {
