@@ -7,5 +7,5 @@ package-lock.json
 lib
 *.db*
 
-test/*/output.dir
-test/*/output.*.dir
+test/**/output.dir
+test/**/output.*.dir

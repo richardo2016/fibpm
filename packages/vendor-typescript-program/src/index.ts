@@ -25,27 +25,29 @@ function createCompilerHost(options: ts.CompilerOptions) {
   return host;
 }
 
-export function compile(fileNames: string[], options: ts.CompilerOptions): void {
+export function compile(fileNames: string[], options: ts.CompilerOptions): ts.EmitResult {
   const host = createCompilerHost(options);
 
   const program = ts.createProgram(fileNames, options, host);
-  let emitResult = program.emit();
+  const emitResult = program.emit();
 
-  let allDiagnostics = ts
+  const allDiagnostics = ts
     .getPreEmitDiagnostics(program)
     .concat(emitResult.diagnostics);
 
   allDiagnostics.forEach(diagnostic => {
     if (diagnostic.file) {
-      let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
-      let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
+      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
       console.error(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
     } else {
       console.error(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
     }
   });
 
-  let exitCode = emitResult.emitSkipped ? 1 : 0;
-  console.log(`Process exiting with code '${exitCode}'.`);
-  process.exit(exitCode);
+  // const exitCode = emitResult.emitSkipped ? 1 : 0;
+  // console.log(`Process exiting with code '${exitCode}'.`);
+  // process.exit(exitCode);
+
+  return emitResult;
 }
