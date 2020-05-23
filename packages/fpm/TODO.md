@@ -22,7 +22,7 @@
         - [ ]`[<@scope>/]<pkg>@<version>`
         - [ ]`[<@scope>/]<pkg>@<version range>`
         - [ ]`<alias>@npm:<name>`
-        - [ ]`<foler>`
+        - [ ]`<folder>`
         - [ ]`<tarball file>`
         - [ ]`<tarball url>`
         - [ ]`<git:// url>`
