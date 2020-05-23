@@ -45,9 +45,5 @@ export function compile(fileNames: string[], options: ts.CompilerOptions): ts.Em
     }
   });
 
-  // const exitCode = emitResult.emitSkipped ? 1 : 0;
-  // console.log(`Process exiting with code '${exitCode}'.`);
-  // process.exit(exitCode);
-
   return emitResult;
 }

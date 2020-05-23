@@ -24,7 +24,8 @@
 	"devDependencies": {
 		"@fibjs/types": "^0.27.1",
 		"fib-pool": "^1.6.0",
-		"fib-typify": "^0.6.0"
+		"fib-typify": "^0.6.0",
+		"@fibjs/rmdirr": "^2.0.0"
 	},
 	"publishConfig": {
 		"access": "public"
