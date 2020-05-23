@@ -1,0 +1,11 @@
+*.sublime-*
+node_modules/
+test.js
+
+package-lock.json
+
+lib
+*.db*
+
+test/*/output.dir
+test/*/output.*.dir

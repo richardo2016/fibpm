@@ -24,5 +24,9 @@ module.exports = [
         name: 'fpm',
         pkgname: 'fpm',
     },
+    {
+        name: 'vendor-typescript-program',
+        pkgname: 'vendor-typescript-program',
+    }
     /* internal module :end */
 ]
