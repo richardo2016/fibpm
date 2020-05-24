@@ -17,10 +17,6 @@ module.exports = [
     },
     /* internal module :start */
     {
-        name: 'cli',
-        pkgname: 'cli',
-    },
-    {
         name: 'fpm',
         pkgname: 'fpm',
     },
