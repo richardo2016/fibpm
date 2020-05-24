@@ -1,11 +1,11 @@
 const test = require('test');
 test.setup();
 
-const Mod = require('../')
+const FPM = require('../')
 
-describe("FxLib", () => {
+describe("FPM", () => {
     it("basic", () => {
-        assert.ok(Mod.default === null)
+        assert.isFunction(FPM.getRegistryConfig)
     });
 });
 
