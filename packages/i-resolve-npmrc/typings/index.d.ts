@@ -3,6 +3,8 @@
  */
 export declare function findConfigFile(projRoot?: string): string | false;
 interface ParsedNpmrcInfo {
+    filename?: string;
+    config_existed: boolean;
     auths: ({
         protocol?: string;
         hostname: string;

@@ -35,5 +35,9 @@
 			"0.29.0",
 			"0.30.0"
 		]
+	},
+	"dependencies": {
+		"@coli/i-resolve-npmrc": "^0.1.0",
+		"@coli/i-resolve-registry": "^0.1.0"
 	}
 }

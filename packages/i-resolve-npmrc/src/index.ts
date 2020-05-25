@@ -26,13 +26,16 @@ export function findConfigFile(projRoot?: string): string | false {
         return projRc
 
     const homeRc = path.resolve(process.env.HOME, `./${DFLT_RC_FILENAME}`)
-    if (fs.exists(homeRc) && fs.stat(homeRc).isDirectory())
+    
+    if (fs.exists(homeRc) && fs.stat(homeRc).isFile())
         return homeRc
 
     return false
 }
 
 interface ParsedNpmrcInfo {
+    filename?: string
+    config_existed: boolean
     auths: ({
         protocol?: string
         hostname: string
@@ -55,19 +58,26 @@ const KV_TUPLE_LINE = /^([^=]+)=([^=]*)$/
 export function parseNpmrc (
     configPath: string
 ): ParsedNpmrcInfo {
-    const rcLines = fs.readLines(configPath)
-
-    const rcConfig = {
-        auths: <ParsedNpmrcInfo['auths']>[],
+    const rcConfig = <ParsedNpmrcInfo>{
+        config_existed: false,
+        auths: [],
         npm_configs: {}
+    }
+    let rcLines = []
+
+    if (configPath) {
+        try {
+            rcLines = fs.readLines(configPath)
+            rcConfig.filename = configPath
+            rcConfig.config_existed = true
+        } catch (error) {}
     }
 
     rcLines.forEach((rcLine, lineNo) => {
         // empty line
         if (!rcLine.trim()) return ;
         // comment line
-        if (rcLine.startsWith('#'))
-            return ;
+        if (rcLine.startsWith('#')) return ;
 
         // parse //<hostname>/
         if (rcLine.startsWith('//')) {
@@ -75,7 +85,7 @@ export function parseNpmrc (
         } else if (KV_TUPLE_LINE.test(rcLine)) {
             util.extend(rcConfig.npm_configs, tryParseKvs(rcLine))
         } else {
-            throw new Error(`unexpected line '${rcLine}' in rc config file ${configPath}`)
+            throw new Error(`unexpected line '${rcLine}' in rc config file ${configPath}:L${lineNo}`)
         }
     })
 
