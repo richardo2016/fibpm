@@ -15,6 +15,10 @@ module.exports = [
         name: 'i-resolve-registry',
         pkgname: 'i-resolve-registry',
     },
+    {
+        name: 'i-resolve-npmrc',
+        pkgname: 'i-resolve-npmrc',
+    },
     /* internal module :start */
     {
         name: 'fpm',
