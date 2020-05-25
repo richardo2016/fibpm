@@ -11,13 +11,14 @@ export function getRegistryConfig (type: string): {
     registry: string
 } {
     const urls = <ReturnType<typeof getRegistryConfig>>{
-        type: null,
+        type: type,
         registry: DFLT_REG_NPMJS_ORG
     };
     
     switch (type) {
         case 'npmjs':
         case 'npmjs.com':
+            urls.type = 'npmjs'
             urls.registry = DFLT_REG_NPMJS_COM;
             break;
         case 'npmjs.org':

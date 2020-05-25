@@ -1,11 +1,11 @@
 const test = require('test');
 test.setup();
 
-const FPM = require('../')
+const Mod = require('../')
 
-describe("FPM", () => {
+describe("Mod", () => {
     it("basic", () => {
-        assert.isFunction(FPM.getRegistryConfig)
+        assert.isFunction(Mod.getRegistryConfig)
     });
 });
 
