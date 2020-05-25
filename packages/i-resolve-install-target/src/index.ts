@@ -8,8 +8,20 @@ const NPM_REGEXP = new RegExp(
     ].join('')
 )
 
-export function parse(target: string): ColiIResolveInstallTarget.ParsedResult['data'] {
-    const result = <ColiIResolveInstallTarget.ParsedResult['data']>{
+type Undefinedable<T> = undefined | T
+
+export function parse(target: string): {
+    type: 'npm' | 'git'
+    pkgname: Undefinedable<string>
+    scope: Undefinedable<string>
+    npm_semver: Undefinedable<string>
+    npm_semver_range: Undefinedable<string>
+    git_user: Undefinedable<string>
+    git_host: Undefinedable<string>
+    git_path: Undefinedable<string>
+    git_commitsh: Undefinedable<string>
+} {
+    const result = <ReturnType<typeof parse>>{
         // support it's npm but maybe set as other type later.
         type: 'npm',
         pkgname: undefined,
