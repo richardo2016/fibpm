@@ -1,14 +1,14 @@
 const test = require('test');
 test.setup();
 
-const FPM = require('../')
+const { default: fpm, Commander, findAndParseNpmrc } = require('../')
 
-const npmrcInfo = FPM.findAndParseNpmrc()
+const npmrcInfo = findAndParseNpmrc()
 
 process.env.FPM_IN_CI = true
 
 // console.log('filename', filename);
-console.log('npmrcInfo.npm_configs', npmrcInfo.npm_configs);
+// console.log('npmrcInfo.npm_configs', npmrcInfo.npm_configs);
 // console.log('npmrcInfo.auths', npmrcInfo.auths);
 const authCfg = npmrcInfo.auths.find(item => item.type === 'authToken')
 
@@ -21,17 +21,17 @@ const testUser = {
     email: 'test-fpm123@gmail.com',
 }
 
-describe("FPM", () => {
+describe("fpm", () => {
     it("basic", () => {
         // assert.ok(FPM.default === null)
     });
 
-    const currentAuthToken = FPM.generateAuthToken()
+    const currentAuthToken = Commander.generateAuthToken()
     let validAuthToken = FALLBACK_RO_TOKEN
 
     describe("helper: generateAuthToken", () => {
         it("generateAuthToken() return uuid v1", () => {
-            let token = FPM.generateAuthToken()
+            let token = Commander.generateAuthToken()
             assert.isString(token)
 
             // console.info(`generate one random authToken ${token}`)
@@ -41,7 +41,7 @@ describe("FPM", () => {
     describe("command: loginAsAnoymous", () => {
         it("generate authToken locally, try to login and get error from registry", () => {
             assert.deepEqual(
-                FPM.loginAsAnoymous({ authToken: currentAuthToken }),
+                fpm.loginAsAnoymous({ authToken: currentAuthToken }),
                 {
                     authToken: currentAuthToken
                 }
@@ -54,13 +54,13 @@ describe("FPM", () => {
 
         it("try fetch authToken, but username/password required", () => {
             assert.propertyVal(
-                FPM.getActiveAuthToken({ ...user, username: undefined, authToken: currentAuthToken }),
+                fpm.getActiveAuthToken({ ...user, username: undefined, authToken: currentAuthToken }),
                 'ok',
                 false
             )
 
             assert.propertyVal(
-                FPM.getActiveAuthToken({ ...user, password: undefined, authToken: currentAuthToken }),
+                fpm.getActiveAuthToken({ ...user, password: undefined, authToken: currentAuthToken }),
                 'ok',
                 false
             )
@@ -68,7 +68,7 @@ describe("FPM", () => {
 
         it("try fetch authToken, email is not required", () => {
             assert.propertyVal(
-                FPM.getActiveAuthToken({ ...user, email: undefined, authToken: currentAuthToken }),
+                fpm.getActiveAuthToken({ ...user, email: undefined, authToken: currentAuthToken }),
                 'ok',
                 true
             )
@@ -77,22 +77,22 @@ describe("FPM", () => {
         // TEST IT if you know what you're testing
         it.skip("try fetch authToken, but otp required", () => {
             assert.propertyVal(
-                FPM.getActiveAuthToken({ ...user, authToken: currentAuthToken }),
+                fpm.getActiveAuthToken({ ...user, authToken: currentAuthToken }),
                 'ok',
                 false
             )
         })
 
         it("fetch authToken success", () => {
-            const token = FPM.generateAuthToken()
+            const token = Commander.generateAuthToken()
             assert.deepEqual(
-                FPM.loginAsAnoymous({ authToken: token }),
+                fpm.loginAsAnoymous({ authToken: token }),
                 {
                     authToken: token
                 }
             )
             
-            const info = FPM.getActiveAuthToken({ ...user, authToken: token })
+            const info = fpm.getActiveAuthToken({ ...user, authToken: token })
             assert.propertyVal(info, 'ok', true)
             assert.property(info, 'id')
             assert.property(info, 'token')
@@ -104,12 +104,12 @@ describe("FPM", () => {
     describe("command: whoami", () => {
         it("return empty object when auth failed", () => {
             assert.deepEqual(
-                FPM.whoami({ authToken: undefined }),
+                fpm.whoami({ authToken: undefined }),
                 {}
             )
 
             assert.deepEqual(
-                FPM.whoami({ authToken: FPM.generateAuthToken() }),
+                fpm.whoami({ authToken: Commander.generateAuthToken() }),
                 {}
             )
         })
@@ -117,7 +117,7 @@ describe("FPM", () => {
         // make sure your FPM_TEST_AUTH_TOKEN is valid
         it("auth success, return profile info with `username` field", () => {
             assert.property(
-                FPM.whoami({
+                fpm.whoami({
                     authToken: FALLBACK_RO_TOKEN
                 }),
                 'username'
