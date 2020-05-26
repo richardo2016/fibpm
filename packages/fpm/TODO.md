@@ -27,12 +27,16 @@
         - [ ]`<tarball url>`
         - [ ]`<git:// url>`
         - [ ]`<github group>/<github project>`
-    - capability: generate deps tree automatically
+    - [ ] capability: generate deps tree automatically
 
 - [ ] `fnpm set-config`
     - alias: `fnpm config set`
-    - capability: update target whole config file
+    - [ ] capability: update target whole config file
 
 - [ ] `fnpm get-config`
     - alias: `fnpm config get`
-    - capability: autoload project .npmrc, if not find, autoload USERHOME/.npmrc
+    - [ ] capability: autoload project .npmrc, if not find, autoload USERHOME/.npmrc
+
+- [ ] `fnpm ls`
+    - [ ] capability: expose as json
+    - [ ] capability: print tree-like structure

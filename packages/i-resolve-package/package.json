@@ -1,14 +1,14 @@
 {
-	"name": "@coli/i-resolve-install-target",
+	"name": "@coli/i-resolve-package",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-install-target"
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-package"
 	},
-	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-install-target",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/i-resolve-package",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",

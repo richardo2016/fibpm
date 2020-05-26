@@ -1,6 +1,6 @@
-## @coli/i-resolve-install-target
+## @coli/i-resolve-package
 
-[![NPM version](https://img.shields.io/npm/v/@coli/i-resolve-install-target.svg)](https://www.npmjs.org/package/@coli/i-resolve-install-target)
+[![NPM version](https://img.shields.io/npm/v/@coli/i-resolve-package.svg)](https://www.npmjs.org/package/@coli/i-resolve-package)
 
 ## Introduction
 

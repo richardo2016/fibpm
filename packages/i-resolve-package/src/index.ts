@@ -10,7 +10,7 @@ const NPM_REGEXP = new RegExp(
 
 type Undefinedable<T> = undefined | T
 
-export function parse(target: string): {
+export function parseInstallTarget(target: string): {
     type: 'npm' | 'git'
     pkgname: Undefinedable<string>
     scope: Undefinedable<string>
@@ -21,7 +21,7 @@ export function parse(target: string): {
     git_path: Undefinedable<string>
     git_commitsh: Undefinedable<string>
 } {
-    const result = <ReturnType<typeof parse>>{
+    const result = <ReturnType<typeof parseInstallTarget>>{
         // support it's npm but maybe set as other type later.
         type: 'npm',
         pkgname: undefined,
@@ -38,7 +38,7 @@ export function parse(target: string): {
         !NPM_REGEXP.test(target)
         // && !GIT_REGEXP.test(target)
     )
-        throw new Error(`[@coli/i-resolve-install-target] invalid target ${target}`)
+        throw new Error(`[@coli/i-resolve-package] invalid target ${target}`)
     
     switch (result.type) {
         case 'npm': {
@@ -61,7 +61,7 @@ export function parse(target: string): {
                     npm_semver_range = npm_semver
                     npm_semver = undefined
                 } else {
-                    throw new Error(`[@coli/i-resolve-install-target] invalid semver in target @${npm_semver}`)
+                    throw new Error(`[@coli/i-resolve-package] invalid semver in target @${npm_semver}`)
                 }
             }
         

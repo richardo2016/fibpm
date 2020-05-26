@@ -4,8 +4,8 @@ module.exports = [
         pkgname: 'imodule-common',
     },
     {
-        name: 'i-resolve-install-target',
-        pkgname: 'i-resolve-install-target',
+        name: 'i-resolve-package',
+        pkgname: 'i-resolve-package',
     },
     {
         name: 'i-user-profile',

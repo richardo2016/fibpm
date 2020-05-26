@@ -1,18 +1,18 @@
 const test = require('test');
 test.setup();
 
-const IResolveInstallTarget = require('../')
+const IResolvePackage = require('../')
 
-describe("i-resolve-install-target", () => {
+describe("i-resolve-package", () => {
     it("bad target input", () => {
         assert.throws(() => {
-            IResolveInstallTarget.parse(`@123/ci`)
+            IResolvePackage.parseInstallTarget(`@123/ci`)
         })
     })
 
     it("[<@scope>/]<pkg>", () => {
         assert.deepEqual(
-            IResolveInstallTarget.parse(`lodash`),
+            IResolvePackage.parseInstallTarget(`lodash`),
             {
                 type: 'npm',
                 pkgname: 'lodash',
@@ -27,7 +27,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`@fibjs/ci`),
+            IResolvePackage.parseInstallTarget(`@fibjs/ci`),
             {
                 type: 'npm',
                 pkgname: '@fibjs/ci',
@@ -42,7 +42,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`123`),
+            IResolvePackage.parseInstallTarget(`123`),
             {
                 type: 'npm',
                 pkgname: '123',
@@ -59,7 +59,7 @@ describe("i-resolve-install-target", () => {
     
     it("[<@scope>/]<pkg>@<version>", () => {
         assert.deepEqual(
-            IResolveInstallTarget.parse(`lodash@1.0.1`),
+            IResolvePackage.parseInstallTarget(`lodash@1.0.1`),
             {
                 type: 'npm',
                 pkgname: 'lodash',
@@ -74,7 +74,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`@fibjs/ci@1.0.5`),
+            IResolvePackage.parseInstallTarget(`@fibjs/ci@1.0.5`),
             {
                 type: 'npm',
                 pkgname: '@fibjs/ci',
@@ -89,7 +89,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`123@1.0.1`),
+            IResolvePackage.parseInstallTarget(`123@1.0.1`),
             {
                 type: 'npm',
                 pkgname: '123',
@@ -106,7 +106,7 @@ describe("i-resolve-install-target", () => {
 
     it("[<@scope>/]<pkg>@<version range>", () => {
         assert.deepEqual(
-            IResolveInstallTarget.parse(`lodash@>=1.0.1`),
+            IResolvePackage.parseInstallTarget(`lodash@>=1.0.1`),
             {
                 type: 'npm',
                 pkgname: 'lodash',
@@ -121,7 +121,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`lodash@^1.0.1`),
+            IResolvePackage.parseInstallTarget(`lodash@^1.0.1`),
             {
                 type: 'npm',
                 pkgname: 'lodash',
@@ -136,7 +136,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`@fibjs/ci@>=1.0.1`),
+            IResolvePackage.parseInstallTarget(`@fibjs/ci@>=1.0.1`),
             {
                 type: 'npm',
                 pkgname: '@fibjs/ci',
@@ -151,7 +151,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`@fibjs/ci@^1.0.1`),
+            IResolvePackage.parseInstallTarget(`@fibjs/ci@^1.0.1`),
             {
                 type: 'npm',
                 pkgname: '@fibjs/ci',
@@ -166,7 +166,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`123@>=1.0.1`),
+            IResolvePackage.parseInstallTarget(`123@>=1.0.1`),
             {
                 type: 'npm',
                 pkgname: '123',
@@ -181,7 +181,7 @@ describe("i-resolve-install-target", () => {
         )
 
         assert.deepEqual(
-            IResolveInstallTarget.parse(`123@^1.0.1`),
+            IResolvePackage.parseInstallTarget(`123@^1.0.1`),
             {
                 type: 'npm',
                 pkgname: '123',

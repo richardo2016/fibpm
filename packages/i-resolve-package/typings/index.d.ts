@@ -1,5 +1,5 @@
 declare type Undefinedable<T> = undefined | T;
-export declare function parse(target: string): {
+export declare function parseInstallTarget(target: string): {
     type: 'npm' | 'git';
     pkgname: Undefinedable<string>;
     scope: Undefinedable<string>;
