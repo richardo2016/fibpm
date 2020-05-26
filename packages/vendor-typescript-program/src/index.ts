@@ -1,4 +1,3 @@
-/// <reference types="@fibjs/types" />
 import * as ts from "typescript";
 
 import * as fs from 'fs';

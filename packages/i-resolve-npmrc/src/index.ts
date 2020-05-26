@@ -8,8 +8,12 @@ const DFLT_RC_FILENAME = '.npmrc'
 const CWD = process.cwd()
 /**
  * @description find npmrc
+ * 
+ * if projRoot provided and got one valid rc-config file path,
+ * don't find rc-config file in USER HOME
  */
 export function findConfigFile(projRoot?: string): string | false {
+    const providedInput = !!projRoot
     projRoot = path.isAbsolute(projRoot) ? projRoot : path.join(CWD, projRoot)
     
     let projRc
@@ -22,8 +26,10 @@ export function findConfigFile(projRoot?: string): string | false {
          }
     }
 
-    if (fs.exists(projRc) && fs.stat(projRc).isFile())
-        return projRc
+    if (projRc && fs.exists(projRc)) {
+        if (fs.stat(projRc).isFile()) return projRc
+    } else if (!projRc || providedInput)
+        return false;
 
     const homeRc = path.resolve(process.env.HOME, `./${DFLT_RC_FILENAME}`)
     
@@ -63,7 +69,7 @@ export function parseNpmrc (
         auths: [],
         npm_configs: {}
     }
-    let rcLines = []
+    let rcLines: string[] = []
 
     if (configPath) {
         try {

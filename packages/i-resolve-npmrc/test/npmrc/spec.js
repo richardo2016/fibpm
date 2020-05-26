@@ -1,4 +1,5 @@
 const path = require('path')
+const util = require('util')
 
 const { findConfigFile, parseNpmrc } = require('../../')
 
@@ -27,10 +28,16 @@ describe("findConfigFile", () => {
 })
 
 describe("parseNpmrc", () => {
+    function pickFields (obj, fields = ['config_existed', 'auths', 'npm_configs']) {
+        return util.pick(obj, fields)
+    }
     it("sample1", () => {
         assert.deepEqual(
-            parseNpmrc(getUnitTestRelpath('./sample1/.npmrc')),
+            pickFields(
+                parseNpmrc(getUnitTestRelpath('./sample1/.npmrc')),
+            ),
             {
+                config_existed: true,
                 auths: [{
                     "protocol": "",
                     "hostname": "registry.npmjs.org",
@@ -46,8 +53,11 @@ describe("parseNpmrc", () => {
 
     it("sample2", () => {
         assert.deepEqual(
-            parseNpmrc(getUnitTestRelpath('./sample2/.npmrc')),
+            pickFields(
+                parseNpmrc(getUnitTestRelpath('./sample2/.npmrc')),
+            ),
             {
+                config_existed: true,
                 auths: [{
                     "protocol": "",
                     "hostname": "registry.npm.taobao.org",
@@ -64,8 +74,11 @@ describe("parseNpmrc", () => {
 
     it("sample3", () => {
         assert.deepEqual(
-            parseNpmrc(getUnitTestRelpath('./sample3/.npmrc')),
+            pickFields(
+                parseNpmrc(getUnitTestRelpath('./sample3/.npmrc')),
+            ),
             {
+                config_existed: true,
                 auths: [{
                     "protocol": "",
                     "hostname": "registry.yarnpkg.com",

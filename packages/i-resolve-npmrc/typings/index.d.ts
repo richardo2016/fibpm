@@ -1,5 +1,8 @@
 /**
  * @description find npmrc
+ *
+ * if projRoot provided and got one valid rc-config file path,
+ * don't find rc-config file in USER HOME
  */
 export declare function findConfigFile(projRoot?: string): string | false;
 interface ParsedNpmrcInfo {
