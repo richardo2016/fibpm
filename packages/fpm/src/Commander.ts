@@ -11,14 +11,11 @@ import crypto = require('crypto')
 
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
-import { SearchedUserInfo } from './NpmUser'
+import { SearchedUserInfo } from './types/NpmUser'
 
 import ssl = require('ssl')
+import { NpmPackageInfoAsDependency } from './types/NpmPackage'
 ssl.loadRootCerts()
-
-// TODO: ask fibjs to support disable verification in http client
-if (isNpmCi())
-    (ssl as any).verification = ssl.VERIFY_NONE
 
 const pkgjson = require('../package.json')
 
@@ -96,8 +93,11 @@ export default class Commander {
 
         this.httpClient = new http.Client()
         this.httpClient.userAgent = getUserAgent()
-        if (process.env.http_proxy)
+        if (process.env.http_proxy) {
             (this.httpClient as any).proxyAgent = process.env.http_proxy
+            if (isNpmCi())
+                (ssl as any).verification = ssl.VERIFY_NONE
+        }
 
         // if ((this.httpClient as any).setClientCert) {
         //     const cert = new crypto.X509Cert();
@@ -203,6 +203,9 @@ export default class Commander {
         return response.json() 
     }
 
+    /**
+     * @description ask npm server who is local user with authToken
+     */
     whoami ({
         registry = this.registry,
         authToken = this.authToken,
@@ -219,6 +222,9 @@ export default class Commander {
         }).json()
     };
 
+    /**
+     * @description search npm package on server
+     */
     search ({
         registry = this.registry,
         authToken = this.authToken,
@@ -295,6 +301,63 @@ export default class Commander {
                 ...args,
                 authToken,
                 referer: `search ${keyword}`,
+            })
+        }).json()
+    }
+
+    /**
+     * @description audit installed npm packages(in node_modules directory generally)quickly
+     * 
+     * @no_test
+     */
+    quickSecurityAudits ({
+        registry = this.registry,
+        authToken = this.authToken,
+        ...args
+    }: CommandActionOptions<{
+        /**
+         * @description npm project's name to be audited
+         */
+        name: string
+        /**
+         * @description packages required by npm projects
+         */
+        requires: NpmPackageInfoAsDependency['requires']
+        dependencies: {
+            [depname: string]: NpmPackageInfoAsDependency
+        }
+    }>): ErrableResponse<{
+        "actions": [],
+        "advisories": {},
+        "muted": [],
+        "metadata": {
+            "vulnerabilities": {
+                "info": number,
+                "low": number,
+                "moderate": number,
+                "high": number,
+                "critical": number
+            },
+            "dependencies": number,
+            "devDependencies": number,
+            "optionalDependencies": number,
+            "totalDependencies": number
+        }
+    }> {
+        return this.httpClient.post(`${registry}/-/npm/v1/security/audits/quick`, {
+            json: {
+                "install": [],
+                "remove": [],
+                "metadata": {
+                    "npm_version": "",
+                    "node_version": "",
+                    "platform": process.platform
+                }
+            },
+            headers: getHeaders({
+                ...args,
+                authToken,
+                referer: `install`,
             })
         }).json()
     }

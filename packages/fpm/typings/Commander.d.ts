@@ -1,5 +1,6 @@
 import { getRegistryConfig } from '@coli/i-resolve-registry';
-import { SearchedUserInfo } from './NpmUser';
+import { SearchedUserInfo } from './types/NpmUser';
+import { NpmPackageInfoAsDependency } from './types/NpmPackage';
 declare type ErrableResponse<T> = Error | T;
 declare type CommandActionOptions<T = {}> = {
     /**
@@ -94,11 +95,17 @@ export default class Commander {
          */
         token: string;
     }>;
+    /**
+     * @description ask npm server who is local user with authToken
+     */
     whoami({ registry, authToken, }: CommandActionOptions<{
         authToken?: string;
     }>): ErrableResponse<{
         username: string;
     }>;
+    /**
+     * @description search npm package on server
+     */
     search({ registry, authToken, offset, size, keyword, ...args }: CommandActionOptions<{
         /**
          * @description page offset
@@ -151,6 +158,41 @@ export default class Commander {
         }>;
         total: number;
         time: string;
+    }>;
+    /**
+     * @description audit installed npm packages(in node_modules directory generally)quickly
+     *
+     * @no_test
+     */
+    quickSecurityAudits({ registry, authToken, ...args }: CommandActionOptions<{
+        /**
+         * @description npm project's name to be audited
+         */
+        name: string;
+        /**
+         * @description packages required by npm projects
+         */
+        requires: NpmPackageInfoAsDependency['requires'];
+        dependencies: {
+            [depname: string]: NpmPackageInfoAsDependency;
+        };
+    }>): ErrableResponse<{
+        "actions": [];
+        "advisories": {};
+        "muted": [];
+        "metadata": {
+            "vulnerabilities": {
+                "info": number;
+                "low": number;
+                "moderate": number;
+                "high": number;
+                "critical": number;
+            };
+            "dependencies": number;
+            "devDependencies": number;
+            "optionalDependencies": number;
+            "totalDependencies": number;
+        };
     }>;
 }
 export {};
