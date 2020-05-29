@@ -7,7 +7,7 @@ const DFLT_REG_NPM_TAOBAO_ORG = `https://registry.npm.taobao.org`
 const DFLT_REG_YARN = `https://registry.yarnpkg.com`
 
 export function getRegistryConfig (type: string): {
-    type: 'npmjs' | 'npmjs.org' | 'taobao' | 'cnpm' | 'yarn'
+    type: 'npmjs' | 'npmjs.org' | 'npmjs.com' | 'taobao' | 'cnpm' | 'yarn'
     registry: string
 } {
     const urls = <ReturnType<typeof getRegistryConfig>>{
@@ -17,12 +17,13 @@ export function getRegistryConfig (type: string): {
     
     switch (type) {
         case 'npmjs':
-        case 'npmjs.com':
-            urls.type = 'npmjs'
-            urls.registry = DFLT_REG_NPMJS_COM;
-            break;
         case 'npmjs.org':
+            urls.type = 'npmjs'
             urls.registry = DFLT_REG_NPMJS_ORG;
+            break;
+        case 'npmjs.com':
+            urls.type = 'npmjs.com'
+            urls.registry = DFLT_REG_NPMJS_COM;
             break;
         case 'taobao':
             urls.registry = DFLT_REG_NPM_TAOBAO_ORG;

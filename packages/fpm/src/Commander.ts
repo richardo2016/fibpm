@@ -2,13 +2,23 @@ import { RayTsTypeHelpers } from '@richardo2016/ts-type-helpers'
 
 import http = require('http')
 import os = require('os')
+import path = require('path')
+import crypto = require('crypto')
 
 // TODO: enable root certificate in httpClient only
-import ssl = require('ssl')
-ssl.loadRootCerts()
+// import ssl = require('ssl')
+// ssl.loadRootCerts()
 
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
+import { SearchedUserInfo } from './NpmUser'
+
+import ssl = require('ssl')
+ssl.loadRootCerts()
+
+// TODO: ask fibjs to support disable verification in http client
+if (isNpmCi())
+    (ssl as any).verification = ssl.VERIFY_NONE
 
 const pkgjson = require('../package.json')
 
@@ -86,6 +96,16 @@ export default class Commander {
 
         this.httpClient = new http.Client()
         this.httpClient.userAgent = getUserAgent()
+        if (process.env.http_proxy)
+            (this.httpClient as any).proxyAgent = process.env.http_proxy
+
+        // if ((this.httpClient as any).setClientCert) {
+        //     const cert = new crypto.X509Cert();
+        //     var k = new crypto.PKey();
+        //     cert.loadRootCerts();
+            
+        //     ;(this.httpClient as any).setClientCert(cert, k);
+        // }
     }
 
     loginAsAnoymous ({
@@ -198,4 +218,84 @@ export default class Commander {
             }
         }).json()
     };
+
+    search ({
+        registry = this.registry,
+        authToken = this.authToken,
+        offset = 0,
+        size = 20,
+        keyword = '',
+        ...args
+    }: CommandActionOptions<{
+        /**
+         * @description page offset
+         */
+        offset: number
+        /**
+         * @description pageSize
+         */
+        size: number
+        keyword: string
+    }>): ErrableResponse<{
+        objects: Array<{
+            package: {
+                name: string
+                scope: 'unscoped' | string
+                /**
+                 * @description semver
+                 */
+                version: string
+                /**
+                 * @description formatted UTC 0 date string
+                 * 
+                 * @sample "2014-12-10T18:36:28.290Z"
+                 */
+                date: string
+                links: {
+                    npm?: string
+                    [k: string]: string
+                }
+                publisher: SearchedUserInfo
+                maintainers: SearchedUserInfo[]
+                flags: {
+                    unstable?: boolean
+                }
+                score: {
+                    /**
+                     * @description float value
+                     * 
+                     * @sample 0.08999959229076177
+                     */
+                    final: number
+                    detail: {
+                        quality: number
+                        popularity: number
+                        maintenance: number
+                    }
+                },
+                searchScore: number
+            },
+
+        }>,
+        // searched number
+        total: number,
+        // UTC ISO time string
+        time: string
+    }> {
+        return this.httpClient.get(`${registry}/-/v1/search`, {
+            query: {
+                text: keyword,
+                from: offset,
+                size,
+                quality: 0.65,
+                popularity: 0.98,
+                maintenance: 0.5,
+            },
+            headers: getHeaders({
+                ...args,
+                authToken,
+                referer: `search ${keyword}`,
+            })
+        }).json()
+    }
 }

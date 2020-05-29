@@ -1,4 +1,5 @@
 import { getRegistryConfig } from '@coli/i-resolve-registry';
+import { SearchedUserInfo } from './NpmUser';
 declare type ErrableResponse<T> = Error | T;
 declare type CommandActionOptions<T = {}> = {
     /**
@@ -97,6 +98,59 @@ export default class Commander {
         authToken?: string;
     }>): ErrableResponse<{
         username: string;
+    }>;
+    search({ registry, authToken, offset, size, keyword, ...args }: CommandActionOptions<{
+        /**
+         * @description page offset
+         */
+        offset: number;
+        /**
+         * @description pageSize
+         */
+        size: number;
+        keyword: string;
+    }>): ErrableResponse<{
+        objects: Array<{
+            package: {
+                name: string;
+                scope: 'unscoped' | string;
+                /**
+                 * @description semver
+                 */
+                version: string;
+                /**
+                 * @description formatted UTC 0 date string
+                 *
+                 * @sample "2014-12-10T18:36:28.290Z"
+                 */
+                date: string;
+                links: {
+                    npm?: string;
+                    [k: string]: string;
+                };
+                publisher: SearchedUserInfo;
+                maintainers: SearchedUserInfo[];
+                flags: {
+                    unstable?: boolean;
+                };
+                score: {
+                    /**
+                     * @description float value
+                     *
+                     * @sample 0.08999959229076177
+                     */
+                    final: number;
+                    detail: {
+                        quality: number;
+                        popularity: number;
+                        maintenance: number;
+                    };
+                };
+                searchScore: number;
+            };
+        }>;
+        total: number;
+        time: string;
     }>;
 }
 export {};

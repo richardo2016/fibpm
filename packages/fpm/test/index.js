@@ -124,6 +124,43 @@ describe("fpm", () => {
             )
         })
     })
+
+    describe("command: search", () => {
+        function assert_searched_info(searchResult, keyword) {
+            assert.property(searchResult, 'objects')
+            assert.isArray(searchResult.objects)
+            assert.isNumber(searchResult.total)
+            assert.isString(searchResult.time)
+
+            let abiPackageWrapper
+            if (
+                keyword === 'abi'
+                && (abiPackageWrapper = searchResult.objects.find(item => item.package === 'abi'))
+            ) {
+                const abiPackage = abiPackageWrapper.package
+                assert.isString(abiPackage.name)
+                assert.isString(abiPackage.scope)
+                assert.isString(abiPackage.version)
+                assert.isString(abiPackage.date)
+                assert.isObject(abiPackage.links)
+                assert.isObject(abiPackage.publisher)
+                assert.isArray(abiPackage.maintainers)
+            }
+        }
+        it("search as anoymous", () => {
+            const temp_fpm = new Commander()
+            const searchResult = temp_fpm.search({ keyword: 'abi' })
+
+            assert_searched_info(searchResult, 'abi')
+        })
+
+        // make sure your FPM_TEST_AUTH_TOKEN is valid
+        it("search when logined", () => {
+            const searchResult = fpm.search({ keyword: 'abi' })
+
+            assert_searched_info(searchResult, 'abi')
+        })
+    })
 });
 
 test.run(console.DEBUG);
