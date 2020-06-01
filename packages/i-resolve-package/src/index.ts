@@ -10,12 +10,25 @@ const NPM_REGEXP = new RegExp(
 
 type Undefinedable<T> = undefined | T
 
+type NPM_TAG = 'latest' | 'beta' | 'next' | string
+// TODO: use robust validation
+function isNpmTag(input: string): input is NPM_TAG {
+    return (
+        input === 'latest'
+        || input === 'beta'
+        || input === 'next'
+        || (typeof input === 'string' && !!input.length)
+    )
+}
+
 export function parseInstallTarget(target: string): {
     type: 'npm' | 'git'
     pkgname: Undefinedable<string>
     scope: Undefinedable<string>
     npm_semver: Undefinedable<string>
     npm_semver_range: Undefinedable<string>
+    // @see https://docs.npmjs.com/cli/dist-tag
+    npm_tag: Undefinedable<NPM_TAG>,
     git_user: Undefinedable<string>
     git_host: Undefinedable<string>
     git_path: Undefinedable<string>
@@ -28,6 +41,7 @@ export function parseInstallTarget(target: string): {
         scope: undefined,
         npm_semver: undefined,
         npm_semver_range: undefined,
+        npm_tag: undefined,
         git_user: undefined,
         git_host: undefined,
         git_path: undefined,
@@ -47,31 +61,40 @@ export function parseInstallTarget(target: string): {
                 ,
                 scope,
                 basename,
-                npm_semver
+                _npm_semver
             ] = target.match(NPM_REGEXP)
+
+            /* scope & pkgname :start */
+            // remove trail slash 
+            if (scope) scope = scope.slice(0, -1)
         
+            result.scope = scope
+            result.pkgname = `${scope ? `${scope}/` : ''}${basename}`
+            /* scope & pkgname :end */
+        
+            /* npm semver & npm tag :start */
             let npm_semver_range
-        
-            if (npm_semver) {
-                npm_semver = npm_semver.slice(1)
+            if (_npm_semver) {
+                let npm_semver = _npm_semver.replace(/^@/, '')
         
                 if (semver.valid(npm_semver)) {
                     npm_semver_range = undefined
                 } else if (semverValidRange(npm_semver)) {
                     npm_semver_range = npm_semver
                     npm_semver = undefined
+                } else if (isNpmTag(npm_semver) && !!result.pkgname) {
+                    result.npm_tag = npm_semver as NPM_TAG
+                    npm_semver = undefined
                 } else {
-                    throw new Error(`[@coli/i-resolve-package] invalid semver in target @${npm_semver}`)
+                    throw new Error(`[@coli/i-resolve-package] invalid semver '${_npm_semver}' in target '${target}'`)
                 }
+
+                _npm_semver = npm_semver
             }
         
-            // remove trail slash 
-            if (scope) scope = scope.slice(0, -1)
-        
-            result.scope = scope
-            result.pkgname = `${scope ? `${scope}/` : ''}${basename}`
-            result.npm_semver = npm_semver
+            result.npm_semver = _npm_semver
             result.npm_semver_range = npm_semver_range
+            /* npm semver & npm tag :end */
         }
         break;
     }
