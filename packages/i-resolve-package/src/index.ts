@@ -1,3 +1,7 @@
+import fs = require('fs')
+import path = require('path')
+import { PackageJSON } from './PackageInfo'
+
 const semver = require('semver')
 const semverValidRange = require('semver/ranges/valid')
 
@@ -21,8 +25,8 @@ function isNpmTag(input: string): input is NPM_TAG {
     )
 }
 
-export function parseInstallTarget(target: string): {
-    type: 'npm' | 'git'
+interface PackageTargetInfo {
+    type: 'npm' | 'git' | 'file'
     pkgname: Undefinedable<string>
     scope: Undefinedable<string>
     npm_semver: Undefinedable<string>
@@ -33,7 +37,9 @@ export function parseInstallTarget(target: string): {
     git_host: Undefinedable<string>
     git_path: Undefinedable<string>
     git_commitsh: Undefinedable<string>
-} {
+}
+
+export function parseInstallTarget(target: string): PackageTargetInfo {
     const result = <ReturnType<typeof parseInstallTarget>>{
         // support it's npm but maybe set as other type later.
         type: 'npm',
@@ -101,3 +107,57 @@ export function parseInstallTarget(target: string): {
 
     return result
 };
+
+interface InstallTree {
+    root: InstallNode
+}
+
+const enum InstallDependencySource {
+    dependencies = 1,
+    devDependencies
+}
+
+interface InstallNode {
+    target: PackageTargetInfo
+    dependencies: {
+        source: InstallDependencySource
+    }[]
+}
+
+type InstallDependencyNode = InstallNode['dependencies'][any]
+
+export function getInstallTree (
+    rootNode: InstallNode,
+    {
+        onParseInstallTarget = parseInstallTarget
+    }: {
+        onParseInstallTarget?: (target: string) => PackageTargetInfo
+        onDeduplicate?: (target: PackageTargetInfo, dependencies: InstallDependencyNode[]) => void
+
+        getMatchedVersion?: (target: PackageTargetInfo) => PackageTargetInfo
+    } = {}
+): InstallTree {
+    return 
+}
+
+export function resolvePackageDotJson(entry: string | any): PackageJSON {
+    let pkgjson: PackageJSON
+
+    switch (typeof entry) {
+        case 'object':
+            pkgjson = entry as PackageJSON
+            break
+        case 'string':
+            entry = path.resolve(process.cwd(), entry)
+            try {
+                pkgjson = JSON.parse(fs.readTextFile(entry))
+            } catch (error) {
+                throw new Error(`[resolvePackageDotJson] error occured! ${error.message}`)
+            }
+            break
+        default:
+            throw new Error(`[resolvePackageDotJson] unsupported entry ${typeof entry}`)
+    }
+
+    return pkgjson
+}
