@@ -1,4 +1,8 @@
+import fs = require('fs')
+import path = require('path')
+
 import zlib = require('zlib')
+import coroutine = require('coroutine')
 
 class ByteStream {
     bytes: Uint8Array
@@ -246,6 +250,8 @@ class TarLocalFile {
 }
 
 export function untar(arrayBuffer: ArrayBuffer) {
+    arrayBuffer = resolveTarballBuffer(arrayBuffer as any) as any as ArrayBuffer;
+
     var bstream = new ByteStream(arrayBuffer);
     var localFiles: TarLocalFile[] = [];
     // While we don't encounter an empty block, keep making TarLocalFiles.
@@ -259,9 +265,73 @@ export function untar(arrayBuffer: ArrayBuffer) {
     return localFiles;
 }
 
-export function resolve(tgz: Class_Buffer) {
+export function resolveTarballBuffer(tgz: Class_Buffer) {
     if ((tgz as any)[0] === 0x1f && (tgz as any)[1] === 0x8b)
         return zlib.gunzip(tgz);
     else
         return tgz;
+}
+
+function findLeastCommonStr(str1: string, str2: string) {
+    let idx = 0;
+    while (str1[idx] === str2[idx]) idx++;
+
+    return str1.slice(0, idx);
+}
+
+function ensureUnSuffix (base = '', suffix = '/') {
+    const lidx = base.lastIndexOf(suffix)
+    if (base.slice(lidx) === suffix)
+        base = base.slice(0, lidx)
+
+    return base;
+}
+
+function mkdirp (inputp: string) {
+    try {
+        if (!fs.exists(inputp))
+            fs.mkdir(inputp);
+    } catch (e) {
+        mkdirp(path.dirname(inputp));
+        try {
+            fs.mkdir(inputp);
+        } catch (e) {}
+    }
+}
+
+export const ensureDirectoryExisted = mkdirp;
+
+export function getArchiveRootName (tarLocalFiles: TarLocalFile[]) {
+    let archive_root_name = `package`;
+    if (tarLocalFiles[0].filename.indexOf(archive_root_name) !== 0) {
+        archive_root_name = ensureUnSuffix(
+            findLeastCommonStr(
+                tarLocalFiles[0].filename,
+                tarLocalFiles[1].filename
+            )
+        )
+    }
+
+    return archive_root_name
+}
+
+export function extractTarLocalFiles (tarLocalFiles: TarLocalFile[], destDirname: string) {
+    if (fs.exists(destDirname) && !fs.stat(destDirname).isDirectory())
+        return false;
+
+    mkdirp(destDirname);
+    const rootName = getArchiveRootName(tarLocalFiles);
+
+    coroutine.parallel(tarLocalFiles, (file: TarLocalFile) => {
+        const relpath = file.filename.slice(rootName.length);
+
+        if (!relpath) return;
+
+        const tpath = path.join(destDirname, relpath);
+        mkdirp(path.dirname(tpath));
+
+        fs.writeFile(tpath, file.fileData as any);
+    })
+
+    return true;
 }

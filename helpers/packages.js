@@ -20,8 +20,8 @@ module.exports = [
         pkgname: 'i-resolve-npmrc',
     },
     {
-        name: 'i-tgz',
-        pkgname: 'i-tgz',
+        name: 'i-tarball',
+        pkgname: 'i-tarball',
     },
     /* internal module :start */
     {
