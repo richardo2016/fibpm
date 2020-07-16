@@ -1,7 +1,7 @@
 const test = require('test');
 test.setup();
 
-const { default: fpm, Commander, findAndParseNpmrc } = require('../')
+const { default: fpm, Commander, findAndParseNpmrc } = require('../');
 
 const npmrcInfo = findAndParseNpmrc()
 
@@ -159,6 +159,99 @@ describe("fpm", () => {
             const searchResult = fpm.search({ keyword: 'abi' })
 
             assert_searched_info(searchResult, 'abi')
+        })
+    })
+
+    describe("command: NpmPackage resolver", () => {
+        it("getNpmPackageIndexedInformationForInstall as anoymous", () => {
+            const temp_fpm = new Commander()
+            const indexedInfo = temp_fpm.getNpmPackageIndexedInformationForInstall({ pkgname: 'abi' })
+
+            assert.isString(indexedInfo.name)
+            assert.isObject(indexedInfo.versions)
+            assert.isObject(indexedInfo['dist-tags'])
+            assert.isString(indexedInfo.modified)
+        })
+
+        describe("getRequestedNpmPackageVersion as anoymous", () => {
+            var temp_fpm
+            before(() => {
+                temp_fpm = new Commander()
+            })
+
+            it('abi', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'abi' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.0') > -1)
+            })
+
+            it('fib-typify', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.1') > -1)
+            })
+
+            it('fib-typify@^0.0.x', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@^0.0.x' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.1') > -1)
+            })
+
+            it('fib-typify@^0.0.1', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@^0.0.1' })
+
+                assert.ok(versions.length === 1)
+                assert.ok(versions[0] = '0.0.1')
+            })
+
+            it('fib-typify@^0.1.x', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@^0.1.x' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.1') === -1)
+                assert.ok(versions.indexOf('0.5.0') === -1)
+                assert.ok(versions.indexOf('0.1.2') > -1)
+            })
+
+            it('fib-typify@0.1.2', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@0.1.2' })
+
+                assert.ok(versions.length === 1)
+                assert.ok(versions.indexOf('0.0.1') === -1)
+                assert.ok(versions.indexOf('0.5.0') === -1)
+                assert.ok(versions.indexOf('0.1.2') === 0)
+            })
+
+            it('fib-typify@^0.5.x', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@^0.5.x' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.1') === -1)
+                assert.ok(versions.indexOf('0.5.0') > -1)
+            })
+
+            it('fib-typify@<0.5.2', () => {
+                var versions = temp_fpm.getRequestedNpmPackageVersions({ target: 'fib-typify@<0.5.2' })
+
+                assert.ok(versions.length)
+                assert.ok(versions.indexOf('0.0.1') > -1)
+                assert.ok(versions.indexOf('0.1.0') > -1)
+                assert.ok(versions.indexOf('0.2.0') > -1)
+                assert.ok(versions.indexOf('0.3.0') > -1)
+                assert.ok(versions.indexOf('0.4.0') > -1)
+                assert.ok(versions.indexOf('0.5.0') > -1)
+                assert.ok(versions.indexOf('0.5.1') > -1)
+            })
+        })
+    })
+
+    describe.skip("command: downloadNpmTarball", () => {
+        it("downloadNpmTarball as anoymous", () => {
+            const temp_fpm = new Commander()
+            const downloadFile = temp_fpm.downloadNpmTarball({ target: 'abi@latest' })
         })
     })
 });

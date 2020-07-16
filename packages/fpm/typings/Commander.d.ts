@@ -1,6 +1,7 @@
+/// <reference types="@fibjs/types" />
 import { getRegistryConfig } from '@coli/i-resolve-registry';
 import { SearchedUserInfo } from './types/NpmUser';
-import { NpmPackageInfoAsDependency } from './types/NpmPackage';
+import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage';
 declare type ErrableResponse<T> = Error | T;
 declare type CommandActionOptions<T = {}> = {
     /**
@@ -194,5 +195,24 @@ export default class Commander {
             "totalDependencies": number;
         };
     }>;
+    getNpmPackageIndexedInformationForInstall({ pkgname, registry, ...args }: CommandActionOptions<{
+        pkgname: string;
+    }>): NpmPackageIndexedCriticalInfo;
+    getNpmPackageIndexedInformationForExplorer({ pkgname, registry, ...args }: CommandActionOptions<{
+        pkgname: string;
+    }>): NpmPackageIndexedCriticalInfo;
+    getRequestedNpmPackageVersions({ target, ...args }: CommandActionOptions<{
+        target: string;
+    }>): string[];
+    downloadNpmTarball({ registry, target, ...args }: CommandActionOptions<{
+        /**
+         * @description install target
+         *
+         * @sample 'typescript@latest'
+         * @sample 'fib-typify@latest'
+         * @sample 'fib-typify@^0.8.x'
+         */
+        target: string;
+    }>): Class_HttpResponse;
 }
 export {};

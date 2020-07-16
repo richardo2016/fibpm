@@ -260,4 +260,6 @@ describe("i-resolve-package", () => {
     });
 });
 
+require('./package.json')
+
 test.run(console.DEBUG);

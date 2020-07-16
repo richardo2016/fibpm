@@ -1,23 +1,30 @@
-import { RayTsTypeHelpers } from '@richardo2016/ts-type-helpers'
+import { parseInstallTarget } from '@coli/i-resolve-package'
 
 import http = require('http')
 import os = require('os')
-import path = require('path')
-import crypto = require('crypto')
 
-// TODO: enable root certificate in httpClient only
-// import ssl = require('ssl')
-// ssl.loadRootCerts()
+const semver = require('semver')
 
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
 import { SearchedUserInfo } from './types/NpmUser'
 
+// TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
-import { NpmPackageInfoAsDependency } from './types/NpmPackage'
+import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage'
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
+
+function tryJSONParseHttpResponse (response: Class_HttpResponse) {
+    switch (response.headers.first('Content-Type')) {
+        case 'application/json':
+            return response.json() 
+        // sometimes, response from remote could be FILTERED by local proxy server.
+        default:
+            return JSON.parse(response.body.readAll() + '')
+    }
+}
 
 type ErrableResponse<T> = Error | T
 
@@ -58,6 +65,7 @@ function getHeaders (input: Partial<CommandActionOptions<any> & {
         'npm-in-ci': isNpmCi(),
         'npm-scope': input.npmScope || '', 
         'authorization': `Bearer ${input.authToken}`,
+        'accept': `application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*`,
         ...input.referer && { 'referer': input.referer },
         ...input.session && { 'npm-session': input.session },
         ...input.otp && { 'npm-otp': input.otp },
@@ -200,7 +208,7 @@ export default class Commander {
             })
         }
 
-        return response.json() 
+        return tryJSONParseHttpResponse(response)
     }
 
     /**
@@ -214,12 +222,15 @@ export default class Commander {
     }>): ErrableResponse<{
         username: string
     }> {
-        return this.httpClient.get(`${registry}/-/whoami`, {
-            headers: {
-                referer: 'whoami',
-                authorization: `Bearer ${authToken}`
-            }
-        }).json()
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/-/whoami`, {
+                headers: {
+                    referer: 'whoami',
+                    authorization: `Bearer ${authToken}`
+                }
+            })
+        )
+        
     };
 
     /**
@@ -288,21 +299,23 @@ export default class Commander {
         // UTC ISO time string
         time: string
     }> {
-        return this.httpClient.get(`${registry}/-/v1/search`, {
-            query: {
-                text: keyword,
-                from: offset,
-                size,
-                quality: 0.65,
-                popularity: 0.98,
-                maintenance: 0.5,
-            },
-            headers: getHeaders({
-                ...args,
-                authToken,
-                referer: `search ${keyword}`,
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/-/v1/search`, {
+                query: {
+                    text: keyword,
+                    from: offset,
+                    size,
+                    quality: 0.65,
+                    popularity: 0.98,
+                    maintenance: 0.5,
+                },
+                headers: getHeaders({
+                    ...args,
+                    authToken,
+                    referer: `search ${keyword}`,
+                })
             })
-        }).json()
+        )
     }
 
     /**
@@ -344,21 +357,127 @@ export default class Commander {
             "totalDependencies": number
         }
     }> {
-        return this.httpClient.post(`${registry}/-/npm/v1/security/audits/quick`, {
-            json: {
-                "install": [],
-                "remove": [],
-                "metadata": {
-                    "npm_version": "",
-                    "node_version": "",
-                    "platform": process.platform
-                }
-            },
+        return tryJSONParseHttpResponse(
+            this.httpClient.post(`${registry}/-/npm/v1/security/audits/quick`, {
+                json: {
+                    "install": [],
+                    "remove": [],
+                    "metadata": {
+                        "npm_version": "",
+                        "node_version": "",
+                        "platform": process.platform
+                    }
+                },
+                headers: getHeaders({
+                    ...args,
+                    authToken,
+                    referer: `install`,
+                })
+            })
+        )
+    }
+
+    getNpmPackageIndexedInformationForInstall ({
+        pkgname,
+        registry = this.registry,
+        ...args
+    }: CommandActionOptions<{
+        pkgname: string
+    }>): NpmPackageIndexedCriticalInfo {
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/${pkgname}`, {
+                headers: getHeaders({
+                    ...args,
+                    /**
+                     * @notice for npmjs.com, if you don't provide referer, it maybe treat
+                     * this time access as from browser, so the response json could have
+                     * fields `_id`, `_rev`, etc. which are not harmful but also pointless :)
+                     */
+                    referer: `install ${pkgname}`,
+                })
+            })
+        )
+    }
+
+    getNpmPackageIndexedInformationForExplorer ({
+        pkgname,
+        registry = this.registry,
+        ...args
+    }: CommandActionOptions<{
+        pkgname: string
+    }>): NpmPackageIndexedCriticalInfo {
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/${pkgname}`, {
+                headers: getHeaders({
+                    ...args,
+                    referer: undefined
+                })
+            })
+        )
+    }
+
+    getRequestedNpmPackageVersions ({
+        target,
+        ...args
+    }: CommandActionOptions<{
+        target: string
+    }>) {
+        const { type, pkgname, npm_semver, npm_tag, npm_semver_range } = parseInstallTarget(target)
+
+        if (type !== 'npm')
+            throw new Error(`type must be 'npm'! but ${type} given.`)
+
+        const indexedInfo = this.getNpmPackageIndexedInformationForInstall({ pkgname, ...args })
+
+        const validVersions: string[] = []
+        const requestedVersion = npm_semver || npm_tag || npm_semver_range
+        Object.keys(indexedInfo.versions).forEach(v => {
+            if (!requestedVersion) {
+                validVersions.push(v)
+            } else if (
+                semver.satisfies(v, npm_semver)
+                || semver.satisfies(v, npm_tag)
+                || semver.satisfies(v, npm_semver_range)
+            ) {
+                validVersions.push(v) 
+            }
+        })
+
+        return validVersions
+    }
+
+    downloadNpmTarball ({
+        registry = this.registry,
+        target,
+        ...args
+    }: CommandActionOptions<{
+        /**
+         * @description install target
+         * 
+         * @sample 'typescript@latest' 
+         * @sample 'fib-typify@latest'
+         * @sample 'fib-typify@^0.8.x'
+         */
+        target: string
+    }>) {
+        const { type, pkgname, npm_semver, npm_tag } = parseInstallTarget(target)
+        console.log(
+            'parseInstallTarget(target)',
+            parseInstallTarget(target)
+        )
+
+        if (type !== 'npm')
+            throw new Error(`type must be 'npm'! but ${type} given.`)
+
+        const semver = npm_semver || npm_tag
+
+        return this.httpClient.get(`${registry}/${pkgname}`, {
             headers: getHeaders({
                 ...args,
-                authToken,
-                referer: `install`,
+                referer: `install ${pkgname}@${semver}`,
+                'pacote-req-type': 'tarball',
+                'pacote-pkg-id': `registry:${pkgname}@https://registry.npmjs.org/${pkgname}/-/${pkgname}-${semver}.tgz`,
             })
-        }).json()
+        })
     }
 }
