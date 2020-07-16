@@ -19,6 +19,10 @@ module.exports = [
         name: 'i-resolve-npmrc',
         pkgname: 'i-resolve-npmrc',
     },
+    {
+        name: 'i-tgz',
+        pkgname: 'i-tgz',
+    },
     /* internal module :start */
     {
         name: 'fpm',

@@ -1,0 +1,39 @@
+{
+	"name": "@coli/i-tgz",
+	"version": "0.1.0",
+	"description": "",
+	"main": "lib",
+	"types": "typings/index.d.ts",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/richardo2016/fibjs-cli/packages/i-tgz"
+	},
+	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/i-tgz",
+	"scripts": {
+		"build": "ftsc ./src/* --outDir ./lib",
+		"test": "fibjs test",
+		"ci": "npm run build && npm run test",
+		"prepublishOnly": "npm run ci"
+	},
+	"author": "richardo2016 <richardo2016@gmail.com>",
+	"license": "ISC",
+	"devDependencies": {
+		"@fibjs/types": "^0.27.1",
+		"fib-pool": "^1.6.0",
+		"fib-typify": "^0.8.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"ci": {
+		"type": "travis, appveyor",
+		"version": [
+			"0.26.0",
+			"0.26.1",
+			"0.27.0",
+			"0.28.0",
+			"0.29.0",
+			"0.30.0"
+		]
+	}
+}
