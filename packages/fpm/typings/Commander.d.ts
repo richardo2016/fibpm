@@ -1,6 +1,6 @@
 import { getRegistryConfig } from '@coli/i-resolve-registry';
 import { SearchedUserInfo } from './types/NpmUser';
-import { NpmPackageInfoAsDependency } from './types/NpmPackage';
+import { NpmPackageInfoAsDependency, NpmPackageInfoIndex } from './types/NpmPackage';
 declare type ErrableResponse<T> = Error | T;
 declare type CommandActionOptions<T = {}> = {
     /**
@@ -194,5 +194,8 @@ export default class Commander {
             "totalDependencies": number;
         };
     }>;
+    getPackageIndexedInformation({ pkgname, registry, ...args }: CommandActionOptions<{
+        pkgname: string;
+    }>): NpmPackageInfoIndex;
 }
 export {};

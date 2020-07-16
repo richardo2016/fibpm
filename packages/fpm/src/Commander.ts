@@ -1,3 +1,5 @@
+import { parseInstallTarget } from '@coli/i-resolve-package'
+
 import http = require('http')
 import os = require('os')
 
@@ -7,7 +9,7 @@ import { SearchedUserInfo } from './types/NpmUser'
 
 // TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
-import { NpmPackageInfoAsDependency } from './types/NpmPackage'
+import { NpmPackageInfoAsDependency, NpmPackageInfoIndex } from './types/NpmPackage'
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
@@ -372,4 +374,56 @@ export default class Commander {
             })
         )
     }
+
+    getPackageIndexedInformation ({
+        pkgname,
+        registry = this.registry,
+        ...args
+    }: CommandActionOptions<{
+        pkgname: string
+    }>): NpmPackageInfoIndex {
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/${pkgname}`, {
+                headers: getHeaders({
+                    ...args,
+                    /**
+                     * @notice for npmjs.com, if you don't provide referer, it maybe treat
+                     * this time access as from browser, so the response json could have
+                     * fields `_id`, `_rev`, etc. which are not harmful but also pointless :)
+                     */
+                    referer: `install ${pkgname}`,
+                })
+            })
+        )
+    }
+
+    // downloadNpmTarget ({
+    //     registry = this.registry,
+    //     authToken = this.authToken,
+    //     target,
+    //     ...args
+    // }: CommandActionOptions<{
+    //     /**
+    //      * @description install target
+    //      * 
+    //      * @sample 'typescript@latest' 
+    //      * @sample 'fib-typify@latest'
+    //      * @sample 'fib-typify@^0.8.x'
+    //      */
+    //     target: string
+    // }>) {
+    //     const { type, pkgname, npm_semver_range } = parseInstallTarget(target)
+    //     console.log(
+    //         'parseInstallTarget(target)',
+    //         parseInstallTarget(target)
+    //     )
+
+    //     // return this.httpClient.get(`${registry}/${pkgname}`, {
+    //     //     headers: getHeaders({
+    //     //         ...args,
+    //     //         authToken,
+    //     //         referer: `install ${pkgname}@${npm_semver_range}`,
+    //     //     })
+    //     // }).json()
+    // }
 }

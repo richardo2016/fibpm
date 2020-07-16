@@ -1,7 +1,7 @@
 const test = require('test');
 test.setup();
 
-const { default: fpm, Commander, findAndParseNpmrc } = require('../')
+const { default: fpm, Commander, findAndParseNpmrc } = require('../');
 
 const npmrcInfo = findAndParseNpmrc()
 
@@ -159,6 +159,26 @@ describe("fpm", () => {
             const searchResult = fpm.search({ keyword: 'abi' })
 
             assert_searched_info(searchResult, 'abi')
+        })
+    })
+
+    describe.only("command: getPackageIndexedInformation", () => {
+        it("getPackageIndexedInformation as anoymous", () => {
+            const temp_fpm = new Commander()
+            const indexedInfo = temp_fpm.getPackageIndexedInformation({ pkgname: 'abi' })
+
+            assert.isString(indexedInfo.name)
+            assert.isObject(indexedInfo.versions)
+            assert.isObject(indexedInfo['dist-tags'])
+            assert.isString(indexedInfo.modified)
+            
+        })
+    })
+
+    describe("command: downloadNpmTarget", () => {
+        it("downloadNpmPackage as anoymous", () => {
+            const temp_fpm = new Commander()
+            const downloadFile = temp_fpm.downloadNpmTarget({ target: 'abi@latest' })
         })
     })
 });
