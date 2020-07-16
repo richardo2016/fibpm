@@ -1,23 +1,26 @@
-import { RayTsTypeHelpers } from '@richardo2016/ts-type-helpers'
-
 import http = require('http')
 import os = require('os')
-import path = require('path')
-import crypto = require('crypto')
-
-// TODO: enable root certificate in httpClient only
-// import ssl = require('ssl')
-// ssl.loadRootCerts()
 
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
 import { SearchedUserInfo } from './types/NpmUser'
 
+// TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
 import { NpmPackageInfoAsDependency } from './types/NpmPackage'
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
+
+function tryJSONParseHttpResponse (response: Class_HttpResponse) {
+    switch (response.headers.first('Content-Type')) {
+        case 'application/json':
+            return response.json() 
+        // sometimes, response from remote could be FILTERED by local proxy server.
+        default:
+            return JSON.parse(response.body.readAll() + '')
+    }
+}
 
 type ErrableResponse<T> = Error | T
 
@@ -58,6 +61,7 @@ function getHeaders (input: Partial<CommandActionOptions<any> & {
         'npm-in-ci': isNpmCi(),
         'npm-scope': input.npmScope || '', 
         'authorization': `Bearer ${input.authToken}`,
+        'accept': `application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*`,
         ...input.referer && { 'referer': input.referer },
         ...input.session && { 'npm-session': input.session },
         ...input.otp && { 'npm-otp': input.otp },
@@ -200,7 +204,7 @@ export default class Commander {
             })
         }
 
-        return response.json() 
+        return tryJSONParseHttpResponse(response)
     }
 
     /**
@@ -214,12 +218,15 @@ export default class Commander {
     }>): ErrableResponse<{
         username: string
     }> {
-        return this.httpClient.get(`${registry}/-/whoami`, {
-            headers: {
-                referer: 'whoami',
-                authorization: `Bearer ${authToken}`
-            }
-        }).json()
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/-/whoami`, {
+                headers: {
+                    referer: 'whoami',
+                    authorization: `Bearer ${authToken}`
+                }
+            })
+        )
+        
     };
 
     /**
@@ -288,21 +295,23 @@ export default class Commander {
         // UTC ISO time string
         time: string
     }> {
-        return this.httpClient.get(`${registry}/-/v1/search`, {
-            query: {
-                text: keyword,
-                from: offset,
-                size,
-                quality: 0.65,
-                popularity: 0.98,
-                maintenance: 0.5,
-            },
-            headers: getHeaders({
-                ...args,
-                authToken,
-                referer: `search ${keyword}`,
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/-/v1/search`, {
+                query: {
+                    text: keyword,
+                    from: offset,
+                    size,
+                    quality: 0.65,
+                    popularity: 0.98,
+                    maintenance: 0.5,
+                },
+                headers: getHeaders({
+                    ...args,
+                    authToken,
+                    referer: `search ${keyword}`,
+                })
             })
-        }).json()
+        )
     }
 
     /**
@@ -344,21 +353,23 @@ export default class Commander {
             "totalDependencies": number
         }
     }> {
-        return this.httpClient.post(`${registry}/-/npm/v1/security/audits/quick`, {
-            json: {
-                "install": [],
-                "remove": [],
-                "metadata": {
-                    "npm_version": "",
-                    "node_version": "",
-                    "platform": process.platform
-                }
-            },
-            headers: getHeaders({
-                ...args,
-                authToken,
-                referer: `install`,
+        return tryJSONParseHttpResponse(
+            this.httpClient.post(`${registry}/-/npm/v1/security/audits/quick`, {
+                json: {
+                    "install": [],
+                    "remove": [],
+                    "metadata": {
+                        "npm_version": "",
+                        "node_version": "",
+                        "platform": process.platform
+                    }
+                },
+                headers: getHeaders({
+                    ...args,
+                    authToken,
+                    referer: `install`,
+                })
             })
-        }).json()
+        )
     }
 }
