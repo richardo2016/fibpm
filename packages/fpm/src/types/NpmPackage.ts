@@ -1,5 +1,6 @@
 type NpmSemverString = string
 type FormattedSemverString = string
+type NpmUTC0DateString = string
 
 export interface NpmPackageInfoAsDependency {
     /**
@@ -81,5 +82,5 @@ export interface NpmPackageInfoIndex {
     /**
      * @description latest modified date string
      */
-	modified: string
+	modified: NpmUTC0DateString
 }
