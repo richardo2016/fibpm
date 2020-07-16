@@ -1,6 +1,7 @@
 import fs = require('fs')
 import path = require('path')
 import { PackageJSON } from './PackageInfo'
+export { PackageJSON }
 
 const semver = require('semver')
 const semverValidRange = require('semver/ranges/valid')

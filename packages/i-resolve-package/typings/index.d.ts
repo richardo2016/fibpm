@@ -1,4 +1,5 @@
 import { PackageJSON } from './PackageInfo';
+export { PackageJSON };
 declare type Undefinedable<T> = undefined | T;
 declare type NPM_TAG = 'latest' | 'beta' | 'next' | string;
 interface PackageTargetInfo {
@@ -34,4 +35,3 @@ export declare function getInstallTree(rootNode: InstallNode, { onParseInstallTa
     getMatchedVersion?: (target: PackageTargetInfo) => PackageTargetInfo;
 }): InstallTree;
 export declare function resolvePackageDotJson(entry: string | any): PackageJSON;
-export {};

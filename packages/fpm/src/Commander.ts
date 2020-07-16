@@ -3,13 +3,15 @@ import { parseInstallTarget } from '@coli/i-resolve-package'
 import http = require('http')
 import os = require('os')
 
+const semver = require('semver')
+
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
 import { SearchedUserInfo } from './types/NpmUser'
 
 // TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
-import { NpmPackageInfoAsDependency, NpmPackageInfoIndex } from './types/NpmPackage'
+import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage'
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
@@ -375,13 +377,13 @@ export default class Commander {
         )
     }
 
-    getPackageIndexedInformation ({
+    getNpmPackageIndexedInformationForInstall ({
         pkgname,
         registry = this.registry,
         ...args
     }: CommandActionOptions<{
         pkgname: string
-    }>): NpmPackageInfoIndex {
+    }>): NpmPackageIndexedCriticalInfo {
         return tryJSONParseHttpResponse(
             this.httpClient.get(`${registry}/${pkgname}`, {
                 headers: getHeaders({
@@ -397,33 +399,85 @@ export default class Commander {
         )
     }
 
-    // downloadNpmTarget ({
-    //     registry = this.registry,
-    //     authToken = this.authToken,
-    //     target,
-    //     ...args
-    // }: CommandActionOptions<{
-    //     /**
-    //      * @description install target
-    //      * 
-    //      * @sample 'typescript@latest' 
-    //      * @sample 'fib-typify@latest'
-    //      * @sample 'fib-typify@^0.8.x'
-    //      */
-    //     target: string
-    // }>) {
-    //     const { type, pkgname, npm_semver_range } = parseInstallTarget(target)
-    //     console.log(
-    //         'parseInstallTarget(target)',
-    //         parseInstallTarget(target)
-    //     )
+    getNpmPackageIndexedInformationForExplorer ({
+        pkgname,
+        registry = this.registry,
+        ...args
+    }: CommandActionOptions<{
+        pkgname: string
+    }>): NpmPackageIndexedCriticalInfo {
+        return tryJSONParseHttpResponse(
+            this.httpClient.get(`${registry}/${pkgname}`, {
+                headers: getHeaders({
+                    ...args,
+                    referer: undefined
+                })
+            })
+        )
+    }
 
-    //     // return this.httpClient.get(`${registry}/${pkgname}`, {
-    //     //     headers: getHeaders({
-    //     //         ...args,
-    //     //         authToken,
-    //     //         referer: `install ${pkgname}@${npm_semver_range}`,
-    //     //     })
-    //     // }).json()
-    // }
+    getRequestedNpmPackageVersions ({
+        target,
+        ...args
+    }: CommandActionOptions<{
+        target: string
+    }>) {
+        const { type, pkgname, npm_semver, npm_tag, npm_semver_range } = parseInstallTarget(target)
+
+        if (type !== 'npm')
+            throw new Error(`type must be 'npm'! but ${type} given.`)
+
+        const indexedInfo = this.getNpmPackageIndexedInformationForInstall({ pkgname, ...args })
+
+        const validVersions: string[] = []
+        const requestedVersion = npm_semver || npm_tag || npm_semver_range
+        Object.keys(indexedInfo.versions).forEach(v => {
+            if (!requestedVersion) {
+                validVersions.push(v)
+            } else if (
+                semver.satisfies(v, npm_semver)
+                || semver.satisfies(v, npm_tag)
+                || semver.satisfies(v, npm_semver_range)
+            ) {
+                validVersions.push(v) 
+            }
+        })
+
+        return validVersions
+    }
+
+    downloadNpmTarball ({
+        registry = this.registry,
+        target,
+        ...args
+    }: CommandActionOptions<{
+        /**
+         * @description install target
+         * 
+         * @sample 'typescript@latest' 
+         * @sample 'fib-typify@latest'
+         * @sample 'fib-typify@^0.8.x'
+         */
+        target: string
+    }>) {
+        const { type, pkgname, npm_semver, npm_tag } = parseInstallTarget(target)
+        console.log(
+            'parseInstallTarget(target)',
+            parseInstallTarget(target)
+        )
+
+        if (type !== 'npm')
+            throw new Error(`type must be 'npm'! but ${type} given.`)
+
+        const semver = npm_semver || npm_tag
+
+        return this.httpClient.get(`${registry}/${pkgname}`, {
+            headers: getHeaders({
+                ...args,
+                referer: `install ${pkgname}@${semver}`,
+                'pacote-req-type': 'tarball',
+                'pacote-pkg-id': `registry:${pkgname}@https://registry.npmjs.org/${pkgname}/-/${pkgname}-${semver}.tgz`,
+            })
+        })
+    }
 }
