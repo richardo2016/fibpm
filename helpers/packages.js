@@ -20,6 +20,10 @@ module.exports = [
         pkgname: 'i-resolve-npmrc',
     },
     {
+        name: 'i-data-npmresponse',
+        pkgname: 'i-data-npmresponse',
+    },
+    {
         name: 'i-tarball',
         pkgname: 'i-tarball',
     },
