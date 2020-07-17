@@ -91,6 +91,7 @@ declare class TarLocalFile {
     fileData: Uint8Array;
     constructor(bstream: ByteStream);
 }
+export declare function validateSha1(tgz: Class_Buffer, shasum: string): boolean;
 export declare function untar(arrayBuffer: ArrayBuffer): TarLocalFile[];
 export declare function resolveTarballBuffer(tgz: Class_Buffer): Class_Buffer;
 declare function mkdirp(inputp: string): void;

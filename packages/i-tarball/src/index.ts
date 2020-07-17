@@ -3,6 +3,7 @@ import path = require('path')
 
 import zlib = require('zlib')
 import coroutine = require('coroutine')
+import hash = require('hash')
 
 class ByteStream {
     bytes: Uint8Array
@@ -247,6 +248,10 @@ class TarLocalFile {
             bstream.readBytes(remaining)
         }
     }
+}
+
+export function validateSha1 (tgz: Class_Buffer, shasum:string) {
+    return hash.sha1(tgz).digest().hex() === shasum
 }
 
 export function untar(arrayBuffer: ArrayBuffer) {

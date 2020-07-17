@@ -8,8 +8,10 @@ const {
     ensureDirectoryExisted,
     getArchiveRootName,
     untar,
-    extractTarLocalFiles
+    extractTarLocalFiles,
+    validateSha1
 } = require('../');
+const { it } = require('test');
 
 const tmpDir = path.resolve(__dirname, './tmp');
 ensureDirectoryExisted(tmpDir);
@@ -23,10 +25,12 @@ describe("tgz", () => {
 
     describe("unzip one tar.gz", () => {
         let tarLocalFiles;
-        let archiveRootName
+        let archiveRootName;
+        const ipt = path.resolve(__dirname, './input/fib-typify-0.0.1.tgz');
+        const buf = fs.readFile(ipt);
+
         before(() => {
-            const ipt = path.resolve(__dirname, './input/fib-typify-0.0.1.tgz');
-            tarLocalFiles = untar(fs.readFile(ipt))
+            tarLocalFiles = untar(buf)
 
             archiveRootName = getArchiveRootName(tarLocalFiles)
         });
@@ -56,6 +60,10 @@ describe("tgz", () => {
                 const uncompressedPath = path.join(dest, relpath);
                 assert.ok(fs.exists(uncompressedPath))
             })
+        });
+
+        it("validateSha1", () => {
+            validateSha1(buf, "dd601d52a277f250772cb31f2f09b35af32911f2");
         });
     });
 });
