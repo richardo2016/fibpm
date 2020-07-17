@@ -3,8 +3,6 @@ import { parseInstallTarget } from '@coli/i-resolve-package'
 import http = require('http')
 import os = require('os')
 
-const semver = require('semver')
-
 import { getRegistryConfig } from '@coli/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
 import { SearchedUserInfo } from './types/NpmUser'
@@ -12,6 +10,7 @@ import { SearchedUserInfo } from './types/NpmUser'
 // TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
 import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage'
+import { checkoutValidNpmPackageVersions } from './Helpers'
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
@@ -429,21 +428,9 @@ export default class Commander {
 
         const indexedInfo = this.getNpmPackageIndexedInformationForInstall({ pkgname, ...args })
 
-        const validVersions: string[] = []
-        const requestedVersion = npm_semver || npm_tag || npm_semver_range
-        Object.keys(indexedInfo.versions).forEach(v => {
-            if (!requestedVersion) {
-                validVersions.push(v)
-            } else if (
-                semver.satisfies(v, npm_semver)
-                || semver.satisfies(v, npm_tag)
-                || semver.satisfies(v, npm_semver_range)
-            ) {
-                validVersions.push(v) 
-            }
-        })
-
-        return validVersions
+        return checkoutValidNpmPackageVersions({
+            npm_semver, npm_tag, npm_semver_range
+        }, Object.keys(indexedInfo.versions))
     }
 
     downloadNpmTarball ({
@@ -476,7 +463,7 @@ export default class Commander {
                 ...args,
                 referer: `install ${pkgname}@${semver}`,
                 'pacote-req-type': 'tarball',
-                'pacote-pkg-id': `registry:${pkgname}@https://registry.npmjs.org/${pkgname}/-/${pkgname}-${semver}.tgz`,
+                'pacote-pkg-id': `registry:${pkgname}@${registry}/${pkgname}/-/${pkgname}-${semver}.tgz`,
             })
         })
     }

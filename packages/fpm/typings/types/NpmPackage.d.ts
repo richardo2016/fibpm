@@ -62,6 +62,7 @@ export declare type NpmPackageInfoFromBrowser = Omit<NpmPackageIndexedCriticalIn
             _id?: string;
             _nodeVersion?: string;
             _npmVersion?: string;
+            _npmUser?: NpmUserInfo;
             _npmOperationalInternal?: {
                 host: string;
                 tmp: string;
