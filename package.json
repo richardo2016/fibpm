@@ -1,8 +1,8 @@
 {
-  "name": "fibjs-cli",
+  "name": "fibpm",
   "mono": {
     "scope": "fibpm",
-    "git_path": "richardo2016/fibjs-cli"
+    "git_path": "richardo2016/fibpm"
   },
   "private": true,
   "scripts": {

@@ -7,9 +7,9 @@
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/vendor-typescript-program"
+		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/vendor-typescript-program"
 	},
-	"homepage": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/vendor-typescript-program",
+	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/vendor-typescript-program",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
