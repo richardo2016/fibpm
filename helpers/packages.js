@@ -1,9 +1,5 @@
 module.exports = [
     {
-        name: 'imodule-common',
-        _dirname: 'imodule-common',
-    },
-    {
         name: 'i-resolve-package',
         _dirname: 'i-resolve-package',
     },
