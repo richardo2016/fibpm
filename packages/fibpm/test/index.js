@@ -21,7 +21,7 @@ const testUser = {
     email: 'test-fpm123@gmail.com',
 }
 
-describe("fpm", () => {
+describe("fibpm", () => {
     it("basic", () => {
         // assert.ok(FPM.default === null)
     });

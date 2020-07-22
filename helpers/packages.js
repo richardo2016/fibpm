@@ -29,8 +29,9 @@ module.exports = [
     },
     /* internal module :start */
     {
-        name: 'fpm',
-        _dirname: 'fpm',
+        name: 'fibpm',
+        _dirname: 'fibpm',
+        isTopPackage: true
     },
     {
         name: 'vendor-typescript-program',

@@ -1,14 +1,14 @@
 {
-	"name": "@coli/fpm",
+	"name": "fibpm",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/fpm"
+		"url": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/fibpm"
 	},
-	"homepage": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/fpm",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/fibpm",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
@@ -35,9 +35,9 @@
 		]
 	},
 	"dependencies": {
-		"@coli/i-resolve-npmrc": "^0.1.0",
-		"@coli/i-resolve-package": "^0.1.0",
-		"@coli/i-resolve-registry": "^0.1.0",
+		"@fibpm/i-resolve-npmrc": "^0.1.0",
+		"@fibpm/i-resolve-package": "^0.1.0",
+		"@fibpm/i-resolve-registry": "^0.1.0",
 		"@richardo2016/ts-type-helpers": "^0.1.4"
 	}
 }

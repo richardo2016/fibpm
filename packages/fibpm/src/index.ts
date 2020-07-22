@@ -1,4 +1,4 @@
-import { findConfigFile, parseNpmrc } from '@coli/i-resolve-npmrc'
+import { findConfigFile, parseNpmrc } from '@fibpm/i-resolve-npmrc'
 
 export function findAndParseNpmrc (): ReturnType<typeof parseNpmrc> {
     return parseNpmrc(findConfigFile(process.cwd()) || undefined)

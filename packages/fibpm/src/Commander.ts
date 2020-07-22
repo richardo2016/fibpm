@@ -1,9 +1,9 @@
-import { parseInstallTarget } from '@coli/i-resolve-package'
+import { parseInstallTarget } from '@fibpm/i-resolve-package'
 
 import http = require('http')
 import os = require('os')
 
-import { getRegistryConfig } from '@coli/i-resolve-registry'
+import { getRegistryConfig } from '@fibpm/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
 import { SearchedUserInfo } from './types/NpmUser'
 

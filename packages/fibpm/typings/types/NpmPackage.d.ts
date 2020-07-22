@@ -1,4 +1,4 @@
-import { PackageJSON } from "@coli/i-resolve-package";
+import { PackageJSON } from "@fibpm/i-resolve-package";
 import { NpmUserInfo } from "./NpmUser";
 declare type NpmSemverString = string;
 declare type FormattedSemverString = string;

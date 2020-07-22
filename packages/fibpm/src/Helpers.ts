@@ -1,4 +1,4 @@
-import { parseInstallTarget } from '@coli/i-resolve-package'
+import { parseInstallTarget } from '@fibpm/i-resolve-package'
 
 const semver = require('semver')
 

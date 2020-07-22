@@ -1,5 +1,5 @@
 /// <reference types="@fibjs/types" />
-import { getRegistryConfig } from '@coli/i-resolve-registry';
+import { getRegistryConfig } from '@fibpm/i-resolve-registry';
 import { SearchedUserInfo } from './types/NpmUser';
 import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage';
 declare type ErrableResponse<T> = Error | T;

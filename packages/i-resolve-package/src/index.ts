@@ -59,7 +59,7 @@ export function parseInstallTarget(target: string): PackageTargetInfo {
         !NPM_REGEXP.test(target)
         // && !GIT_REGEXP.test(target)
     )
-        throw new Error(`[@coli/i-resolve-package] invalid target ${target}`)
+        throw new Error(`[@fibpm/i-resolve-package] invalid target ${target}`)
     
     switch (result.type) {
         case 'npm': {
@@ -93,7 +93,7 @@ export function parseInstallTarget(target: string): PackageTargetInfo {
                     result.npm_tag = npm_semver as NPM_TAG
                     npm_semver = undefined
                 } else {
-                    throw new Error(`[@coli/i-resolve-package] invalid semver '${_npm_semver}' in target '${target}'`)
+                    throw new Error(`[@fibpm/i-resolve-package] invalid semver '${_npm_semver}' in target '${target}'`)
                 }
 
                 _npm_semver = npm_semver
