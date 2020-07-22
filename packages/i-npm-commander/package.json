@@ -17,6 +17,11 @@
 	},
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
+	"dependencies": {
+		"@fibpm/i-resolve-npmrc": "^0.1.0",
+		"@fibpm/i-resolve-package": "^0.1.0",
+		"@fibpm/i-resolve-registry": "^0.1.0"
+	},
 	"devDependencies": {
 		"@fibjs/types": "^0.31.0",
 		"fib-pool": "^1.6.0",
