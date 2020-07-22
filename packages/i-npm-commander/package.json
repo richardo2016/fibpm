@@ -1,14 +1,14 @@
 {
-	"name": "@fibpm/i-data-npmresponse",
+	"name": "@fibpm/i-npm-commander",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/i-data-npmresponse"
+		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/i-npm-commander"
 	},
-	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/i-data-npmresponse",
+	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/i-npm-commander",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",

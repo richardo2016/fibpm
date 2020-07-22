@@ -16,8 +16,8 @@ module.exports = [
         _dirname: 'i-resolve-npmrc',
     },
     {
-        name: 'i-data-npmresponse',
-        _dirname: 'i-data-npmresponse',
+        name: 'i-npm-commander',
+        _dirname: 'i-npm-commander',
     },
     {
         name: 'i-tarball',
