@@ -30,14 +30,15 @@ const readJson = (jsonpath) => {
 const prettyJson = (content) => {
   return JSON.stringify(
     content, null, '\t'
-  )
+  ) + '\n'
 }
 
 packages.forEach(({
   name: comname,
-  pkgname,
+  isTopPackage,
+  _dirname,
 }) => {
-  const comPkgname = pkgname || `${comname}`
+  const comPkgname = _dirname || `${comname}`
   const comDirname = comPkgname
   const comDir = path.resolve(PKG_DIR, `./${comDirname}`)
   if (!fs.existsSync(comDir)) mkdirp(comDir)
@@ -67,16 +68,33 @@ packages.forEach(({
     let output = ejs.render(source, {
       pkg: {
         name: comPkgname,
-        npm_name: `${scopePrefix}/${comPkgname}`,
+        npm_name: isTopPackage ? comPkgname : `${scopePrefix}/${comPkgname}`,
         git_group: monoInfo.monoscope,
         git_path: monoInfo.gitPath || `${monoscope}/${monoName}`,
         mono_path: `packages/${comPkgname}`,
+        isTopPackage,
       }
     })
 
     if (fname === PKG_JSON_NAME) {
+      output = JSON.parse(output)
+
+      if (existedTargetPkgJson.dependencies) {
+        output.dependencies =  {
+          ...existedTargetPkgJson.dependencies,
+          ...output.dependencies,
+        }
+      }
+
+      if (existedTargetPkgJson.devDependencies) {
+        output.devDependencies =  {
+          ...existedTargetPkgJson.devDependencies,
+          ...output.devDependencies,
+        }
+      }
+
       output = prettyJson(
-        Object.assign({}, existedTargetPkgJson, JSON.parse(output))
+        Object.assign({}, existedTargetPkgJson, output)
       )
 
       if (target_existed && prettyJson(existedTargetPkgJson) === output) return ;

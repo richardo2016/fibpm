@@ -6,9 +6,9 @@
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibjs-cli/packages/imodule-common"
+		"url": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/imodule-common"
 	},
-	"homepage": "https://github.com/richardo2016/fibjs-cli/packages/imodule-common",
+	"homepage": "https://github.com/richardo2016/fibjs-cli/tree/master/packages/imodule-common",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
@@ -18,7 +18,7 @@
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
 	"devDependencies": {
-		"@fibjs/types": "^0.27.1",
+		"@fibjs/types": "^0.31.0",
 		"fib-pool": "^1.6.0",
 		"fib-typify": "^0.8.3"
 	},
@@ -28,12 +28,10 @@
 	"ci": {
 		"type": "travis, appveyor",
 		"version": [
-			"0.26.0",
-			"0.26.1",
-			"0.27.0",
 			"0.28.0",
 			"0.29.0",
-			"0.30.0"
+			"0.30.0",
+			"0.31.0"
 		]
 	}
 }
