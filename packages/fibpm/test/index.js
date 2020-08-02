@@ -1,16 +1,15 @@
 const test = require('test');
 test.setup();
 
-const path = require('path');
 const fibpm = require('../');
 
-function fakeArgs (...args) {
-    return [
-        process.execPath,
-        path.resolve(__dirname, '../bin/fpm.js'),
-        ...args
-    ]
-}
+const {
+    readFromFpmCommand,
+    runFpmCommnd,
+    readHelpOutput
+} = require('./utils');
+
+const pkgjson = require('../package.json');
 
 describe("fibpm.npm()", () => {
     let npmCli;
@@ -24,15 +23,31 @@ describe("fibpm.npm()", () => {
 
     describe("fnpm install", () => {
         it.only("-h, --help", () => {
-            const parsed = npmCli.parse(fakeArgs('install', '--help'))
-            console.dir(parsed);
+            assert.deepEqual(
+                readFromFpmCommand('install', '--help'),
+                readHelpOutput('install', {
+                    VERSION: pkgjson.version
+                })
+            )
         });
 
         it("[...pkgs]", () => {
-            const parsed = npmCli.parse(fakeArgs('install', 'abi'))
-            console.dir(parsed);
+            readFromFpmCommand('install', 'abi');
+        });
+    });
+
+    describe("fnpm run", () => {
+        it.only("-h, --help", () => {
+            assert.deepEqual(
+                readFromFpmCommand('run', '--help'),
+                readHelpOutput('run', {
+                    VERSION: pkgjson.version
+                })
+            )
         });
     });
 });
+
+// require('./examples.js')
 
 test.run(console.DEBUG);

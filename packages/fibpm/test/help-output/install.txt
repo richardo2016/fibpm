@@ -1,0 +1,22 @@
+fpm v{__VERSION__}
+
+Usage:
+  $ fpm install [...pkgs]
+
+Options:
+  -S, --save     default behavior
+  -h, --help     Display this message
+  -v, --version  Display version number
+
+Examples:
+  fpm install (with no args, in package dir)
+  fpm install [<@scope>/]<pkg>
+  fpm install [<@scope>/]<pkg>@<tag>
+  fpm install [<@scope>/]<pkg>@<version>
+  fpm install [<@scope>/]<pkg>@<version range>
+  fpm install <alias>@fpm:<name>
+  fpm install <folder>
+  fpm install <tarball file>
+  fpm install <tarball url>
+  fpm install <git:// url>
+  fpm install <github username>/<github project>

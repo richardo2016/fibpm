@@ -1,0 +1,8 @@
+fpm v{__VERSION__}
+
+Usage:
+  $ fpm run-script <command>
+
+Options:
+  -h, --help     Display this message
+  -v, --version  Display version number
