@@ -15,6 +15,9 @@
 		"ci": "npm run build && npm run test",
 		"prepublishOnly": "npm run ci"
 	},
+	"bin": {
+		"fpm": "./bib/fpm.js"
+	},
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
 	"devDependencies": {
@@ -35,9 +38,11 @@
 		]
 	},
 	"dependencies": {
+		"@fibpm/i-npm-commander": "^0.1.0",
 		"@fibpm/i-resolve-npmrc": "^0.1.0",
 		"@fibpm/i-resolve-package": "^0.1.0",
 		"@fibpm/i-resolve-registry": "^0.1.0",
+		"@fxjs/cli": "^0.0.4",
 		"@richardo2016/ts-type-helpers": "^0.1.4"
 	}
 }
