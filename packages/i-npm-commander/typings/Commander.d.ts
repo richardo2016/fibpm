@@ -1,31 +1,8 @@
 /// <reference types="@fibjs/types" />
 import { getRegistryConfig } from '@fibpm/i-resolve-registry';
-import { SearchedUserInfo } from './types/NpmUser';
-import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage';
+import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo, NpmPackageInfoFromBrowser } from './types/NpmPackage';
+import { CommandActionOptions, CmderSearchActionParams, CmderSearchActionResult, ISearchedPkgInfoWithDetail } from './types/NpmComand';
 declare type ErrableResponse<T> = Error | T;
-declare type CommandActionOptions<T = {}> = {
-    /**
-     * @description auth token
-     */
-    authToken?: string;
-    /**
-     * @description prefer action name
-     */
-    referer?: string;
-    /**
-     * @description npm scope
-     */
-    npmScope?: string;
-    /**
-     * @description whether always auth
-     */
-    alwaysAuth?: boolean;
-    /**
-     * @description one time password
-     */
-    otp?: string;
-    registry?: string;
-} & T;
 export declare function getUserAgent(): string;
 /**
  * @description Commander represents user state(such login status) and actions
@@ -107,59 +84,8 @@ export default class Commander {
     /**
      * @description search npm package on server
      */
-    search({ registry, authToken, offset, size, keyword, ...args }: CommandActionOptions<{
-        /**
-         * @description page offset
-         */
-        offset: number;
-        /**
-         * @description pageSize
-         */
-        size: number;
-        keyword: string;
-    }>): ErrableResponse<{
-        objects: Array<{
-            package: {
-                name: string;
-                scope: 'unscoped' | string;
-                /**
-                 * @description semver
-                 */
-                version: string;
-                /**
-                 * @description formatted UTC 0 date string
-                 *
-                 * @sample "2014-12-10T18:36:28.290Z"
-                 */
-                date: string;
-                links: {
-                    npm?: string;
-                    [k: string]: string;
-                };
-                publisher: SearchedUserInfo;
-                maintainers: SearchedUserInfo[];
-                flags: {
-                    unstable?: boolean;
-                };
-                score: {
-                    /**
-                     * @description float value
-                     *
-                     * @sample 0.08999959229076177
-                     */
-                    final: number;
-                    detail: {
-                        quality: number;
-                        popularity: number;
-                        maintenance: number;
-                    };
-                };
-                searchScore: number;
-            };
-        }>;
-        total: number;
-        time: string;
-    }>;
+    search({ registry, authToken, offset, size, keyword, ...args }: CmderSearchActionParams): ErrableResponse<CmderSearchActionResult>;
+    searchAndGetIndexedInfo(params: CmderSearchActionParams): ErrableResponse<ISearchedPkgInfoWithDetail>;
     /**
      * @description audit installed npm packages(in node_modules directory generally)quickly
      *
@@ -197,13 +123,13 @@ export default class Commander {
     }>;
     getNpmPackageIndexedInformationForInstall({ pkgname, registry, ...args }: CommandActionOptions<{
         pkgname: string;
-    }>): NpmPackageIndexedCriticalInfo;
+    }>): ErrableResponse<NpmPackageIndexedCriticalInfo>;
     getNpmPackageIndexedInformationForExplorer({ pkgname, registry, ...args }: CommandActionOptions<{
         pkgname: string;
-    }>): NpmPackageIndexedCriticalInfo;
+    }>): ErrableResponse<NpmPackageInfoFromBrowser>;
     getRequestedNpmPackageVersions({ target, ...args }: CommandActionOptions<{
         target: string;
-    }>): string[];
+    }>): string[] | Error;
     downloadNpmTarball({ registry, target, ...args }: CommandActionOptions<{
         /**
          * @description install target

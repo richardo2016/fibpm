@@ -46,6 +46,33 @@ describe("fibpm.npm()", () => {
             )
         });
     });
+
+    describe("fnpm search", () => {
+        it("-h, --help", () => {
+            assert.deepEqual(
+                readFromFpmCommand('search', '--help'),
+                readHelpOutput('search', {
+                    VERSION: pkgjson.version
+                })
+            )
+        });
+
+        it("search [abi]", () => {
+            runFpmCommnd('search', 'abi');
+        });
+        
+        it("search [fib-typify]", () => {
+            runFpmCommnd('search', 'fib-typify');
+        });
+
+        it("search not-existed", () => {
+            const notExisted = `lalalalalxxxxxxalala-${Date.now()}`
+            assert.deepEqual(
+                readFromFpmCommand('search', notExisted),
+                `No matches found for "${notExisted}"`
+            )
+        });
+    });
 });
 
 // require('./examples.js')

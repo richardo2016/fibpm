@@ -38,11 +38,13 @@
 		]
 	},
 	"dependencies": {
+		"@fibjs/chalk": "^1.0.0",
 		"@fibpm/i-npm-commander": "^0.1.0",
 		"@fibpm/i-resolve-npmrc": "^0.1.0",
 		"@fibpm/i-resolve-package": "^0.1.0",
 		"@fibpm/i-resolve-registry": "^0.1.0",
 		"@fxjs/cli": "^0.0.4",
-		"@richardo2016/ts-type-helpers": "^0.1.4"
+		"@richardo2016/ts-type-helpers": "^0.1.4",
+		"cli-table": "^0.3.1"
 	}
 }

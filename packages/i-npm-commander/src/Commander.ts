@@ -2,15 +2,19 @@ import { parseInstallTarget } from '@fibpm/i-resolve-package'
 
 import http = require('http')
 import os = require('os')
+import util = require('util')
+
+import coroutine = require('coroutine')
 
 import { getRegistryConfig } from '@fibpm/i-resolve-registry'
 import { getUuid, getISODateString, isNpmCi } from './utils'
-import { SearchedUserInfo } from './types/NpmUser'
 
 // TODO: enable root certificate in httpClient only
 import ssl = require('ssl')
-import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo } from './types/NpmPackage'
+import { NpmPackageInfoAsDependency, NpmPackageIndexedCriticalInfo, NpmPackageInfoFromBrowser } from './types/NpmPackage'
 import { checkoutValidNpmPackageVersions } from './Helpers'
+import { CommandActionOptions, CmderSearchActionParams, CmderSearchActionResult, ISearchPkgInfo, ISearchedPkgInfoWithDetail } from './types/NpmComand'
+
 ssl.loadRootCerts()
 
 const pkgjson = require('../package.json')
@@ -26,31 +30,6 @@ function tryJSONParseHttpResponse (response: Class_HttpResponse) {
 }
 
 type ErrableResponse<T> = Error | T
-
-type CommandActionOptions<T = {}> = {
-    /**
-     * @description auth token
-     */
-    authToken?: string
-    /**
-     * @description prefer action name
-     */
-    referer?: string
-    /**
-     * @description npm scope
-     */
-    npmScope?: string
-    /**
-     * @description whether always auth
-     */
-    alwaysAuth?: boolean
-    /**
-     * @description one time password
-     */
-    otp?: string
-    
-    registry?: string
-} & T
 
 export function getUserAgent () {
     return `fpm/${pkgjson.version} fibjs/v${process.version} ${process.platform} ${process.arch}`
@@ -187,7 +166,7 @@ export default class Commander {
     }> {
         const userid = `org.couchdb.user:${username}`
         const putinfo = {
-            _id: "org.couchdb.user:richardo2016",
+            _id: `org.couchdb.user:${username}`,
             name: username,
             password,
             type: 'user',
@@ -242,62 +221,7 @@ export default class Commander {
         size = 20,
         keyword = '',
         ...args
-    }: CommandActionOptions<{
-        /**
-         * @description page offset
-         */
-        offset: number
-        /**
-         * @description pageSize
-         */
-        size: number
-        keyword: string
-    }>): ErrableResponse<{
-        objects: Array<{
-            package: {
-                name: string
-                scope: 'unscoped' | string
-                /**
-                 * @description semver
-                 */
-                version: string
-                /**
-                 * @description formatted UTC 0 date string
-                 * 
-                 * @sample "2014-12-10T18:36:28.290Z"
-                 */
-                date: string
-                links: {
-                    npm?: string
-                    [k: string]: string
-                }
-                publisher: SearchedUserInfo
-                maintainers: SearchedUserInfo[]
-                flags: {
-                    unstable?: boolean
-                }
-                score: {
-                    /**
-                     * @description float value
-                     * 
-                     * @sample 0.08999959229076177
-                     */
-                    final: number
-                    detail: {
-                        quality: number
-                        popularity: number
-                        maintenance: number
-                    }
-                },
-                searchScore: number
-            },
-
-        }>,
-        // searched number
-        total: number,
-        // UTC ISO time string
-        time: string
-    }> {
+    }: CmderSearchActionParams): ErrableResponse<CmderSearchActionResult> {
         return tryJSONParseHttpResponse(
             this.httpClient.get(`${registry}/-/v1/search`, {
                 query: {
@@ -315,6 +239,33 @@ export default class Commander {
                 })
             })
         )
+    }
+
+    searchAndGetIndexedInfo (
+        params: CmderSearchActionParams
+    ): ErrableResponse<ISearchedPkgInfoWithDetail> {
+        const searchResults = this.search(params);
+
+        if (searchResults instanceof Error)
+            return searchResults;
+
+        const result = util.omit(searchResults, 'objects') as ISearchedPkgInfoWithDetail;
+
+        let err: ErrableResponse<null> = null
+        result.objects = coroutine.parallel(searchResults.objects, (searchedPkgInfo: ISearchPkgInfo) => {
+            const indexedInfo = this.getNpmPackageIndexedInformationForExplorer({ pkgname: searchedPkgInfo.package.name })
+            if (!err && (indexedInfo instanceof Error))
+                err = indexedInfo;
+
+            return {
+                ...searchedPkgInfo,
+                indexedInfo,
+            };
+        })
+
+        if (err) return err;
+
+        return result;
     }
 
     /**
@@ -382,7 +333,7 @@ export default class Commander {
         ...args
     }: CommandActionOptions<{
         pkgname: string
-    }>): NpmPackageIndexedCriticalInfo {
+    }>): ErrableResponse<NpmPackageIndexedCriticalInfo> {
         return tryJSONParseHttpResponse(
             this.httpClient.get(`${registry}/${pkgname}`, {
                 headers: getHeaders({
@@ -404,13 +355,16 @@ export default class Commander {
         ...args
     }: CommandActionOptions<{
         pkgname: string
-    }>): NpmPackageIndexedCriticalInfo {
+    }>): ErrableResponse<NpmPackageInfoFromBrowser> {
         return tryJSONParseHttpResponse(
             this.httpClient.get(`${registry}/${pkgname}`, {
-                headers: getHeaders({
-                    ...args,
-                    referer: undefined
-                })
+                headers: util.omit(
+                    getHeaders({
+                        ...args,
+                        referer: undefined
+                    }),
+                    ['accept']
+                )
             })
         )
     }
@@ -427,6 +381,8 @@ export default class Commander {
             throw new Error(`type must be 'npm'! but ${type} given.`)
 
         const indexedInfo = this.getNpmPackageIndexedInformationForInstall({ pkgname, ...args })
+
+        if (indexedInfo instanceof Error) return indexedInfo;
 
         return checkoutValidNpmPackageVersions({
             npm_semver, npm_tag, npm_semver_range
