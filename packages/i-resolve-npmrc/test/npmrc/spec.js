@@ -31,7 +31,7 @@ describe("parseNpmrc", () => {
     function pickFields (obj, fields = ['config_existed', 'auths', 'npm_configs']) {
         return util.pick(obj, fields)
     }
-    it("sample1", () => {
+    it.only("sample1", () => {
         assert.deepEqual(
             pickFields(
                 parseNpmrc(getUnitTestRelpath('./sample1/.npmrc')),

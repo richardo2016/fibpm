@@ -1,11 +1,17 @@
 import fs = require('fs')
 import path = require('path')
+import os = require('os')
 import url = require('url')
 import querystring = require('querystring')
 import util = require('util')
 
 const DFLT_RC_FILENAME = '.npmrc'
 const CWD = process.cwd()
+
+const isUnixTermWin32 = process.platform === 'win32' && (
+    !!process.env.TERM || !!process.env.COLORTERM
+)
+
 /**
  * @description find npmrc
  * 
@@ -73,7 +79,7 @@ export function parseNpmrc (
 
     if (configPath) {
         try {
-            rcLines = fs.readLines(configPath)
+            rcLines = fs.readTextFile(configPath).replace(/(\r\n)/g, '\n').split('\n');
             rcConfig.filename = configPath
             rcConfig.config_existed = true
         } catch (error) {}
