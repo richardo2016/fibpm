@@ -1,6 +1,6 @@
 {
 	"name": "fibpm",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
@@ -16,7 +16,7 @@
 		"prepublishOnly": "npm run ci"
 	},
 	"bin": {
-		"fpm": "./bib/fpm.js"
+		"fpm": "./bin/fpm.js"
 	},
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
