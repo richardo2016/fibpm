@@ -25,6 +25,7 @@ type IRegFetchOptions = IOptions & IGetAuthOpts & IGetCacheModeOpts & {
     gzip?: boolean
     query?: object
 };
+type IMockResponse = (req: Class_HttpRequest) => void;
 /**
  * @description fetch function, support fake
  * @param uri 
@@ -33,7 +34,8 @@ type IRegFetchOptions = IOptions & IGetAuthOpts & IGetCacheModeOpts & {
  */
 function regFetch(
     uri: string,
-    opts_: IRegFetchOptions
+    opts_: IRegFetchOptions,
+    onRequest?: IMockResponse
 ) {
     const opts = {
         ...defaultOpts,
@@ -66,10 +68,6 @@ function regFetch(
     const auth = getAuth(uri, opts as any)
     const headers = getHeaders(uri, auth, opts)
     let body: Class_Buffer | object | string = opts.body
-    //   const bodyIsStream = Minipass.isStream(body)
-    //   const bodyIsPromise = body &&
-    //     typeof body === 'object' &&
-    //     typeof body.then === 'function'
 
     if (body && typeof body === 'object') {
         headers['content-type'] = headers['content-type'] || 'application/json'
@@ -77,11 +75,6 @@ function regFetch(
     } else if (body && !headers['content-type']) {
         headers['content-type'] = 'application/octet-stream'
     }
-    //   if (body && !bodyIsStream && !bodyIsPromise && typeof body !== 'string' && !Buffer.isBuffer(body)) {
-    //     headers['content-type'] = headers['content-type'] || 'application/json'
-    //     body = JSON.stringify(body)
-    //   } else if (body && !headers['content-type'])
-    //     headers['content-type'] = 'application/octet-stream'
 
     if (opts.gzip) {
         headers['content-encoding'] = 'gzip'
@@ -111,58 +104,24 @@ function regFetch(
         opts.preferOnline = true
     }
 
-    httpRequest.method = opts.method;
-    httpRequest.setHeader(headers);
-    httpRequest.addHeader('HOST', parsed.hostname)
-    httpRequest.value = parsed.path;
-    // console.log("parsed.hostname", parsed.hostname);
-    // console.log("parsed.path", parsed.path);
-    
-    httpRequest.body.write(body as any);
+    if (onRequest) {
+        httpRequest.method = opts.method;
+        httpRequest.setHeader(headers);
+        httpRequest.addHeader('HOST', parsed.hostname)
+        httpRequest.value = parsed.path;
+        
+        httpRequest.body.write(body as any);
 
-    // return fake http request
-    return httpRequest;
+        onRequest(httpRequest);
 
+        return httpRequest.response;
+    }
 
-    // const p = fetch(uri, {
-    //     agent: opts.agent,
-    //     algorithms: opts.algorithms,
-    //     body,
-    //     cache: getCacheMode(opts),
-    //     cacheManager: opts.cache,
-    //     ca: opts.ca,
-    //     cert: opts.cert,
-    //     headers,
-    //     integrity: opts.integrity,
-    //     key: opts.key,
-    //     localAddress: opts.localAddress,
-    //     maxSockets: opts.maxSockets,
-    //     memoize: opts.memoize,
-    //     method: method,
-    //     noProxy: opts.noProxy,
-    //     proxy: opts.httpsProxy || opts.proxy,
-    //     retry: opts.retry ? opts.retry : {
-    //         retries: opts.fetchRetries,
-    //         factor: opts.fetchRetryFactor,
-    //         minTimeout: opts.fetchRetryMintimeout,
-    //         maxTimeout: opts.fetchRetryMaxtimeout,
-    //     },
-    //     strictSSL: opts.strictSSL,
-    //     timeout: opts.timeout || 30 * 1000,
-    // }).then(res => checkResponse({
-    //     method,
-    //     uri,
-    //     res,
-    //     registry,
-    //     startTime,
-    //     auth,
-    //     opts,
-    // }))
-
-    // const client = new http.Client();
-    // client.request(opts.method, uri, {
-    //     body:
-    // })
+    const client = new http.Client();
+    return client.request(opts.method, uri, {
+        body,
+        headers,
+    });
 
     // if (typeof opts.otpPrompt === 'function') {
     //     return p.catch(async er => {
@@ -183,16 +142,11 @@ function regFetch(
 export = regFetch;
 
 regFetch.json = (uri: string, opts: IRegFetchOptions) => {
-  return regFetch(uri, opts)
-//   .then(res => res.json())
+  return regFetch(uri, opts).json();
 }
 
-regFetch.jsonMock = (uri: string, opts: IRegFetchOptions) => {
-    const req = regFetch(uri, opts);
-
-    return {
-        pipe: (ms: MockServer) => ms.receive(req)
-    }
+regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, mockResponse: IMockResponse) => {
+    return regFetch(uri, opts, mockResponse).json();
 }
 
 // fetchJSON.stream = fetchJSONStream
@@ -207,6 +161,9 @@ regFetch.jsonMock = (uri: string, opts: IRegFetchOptions) => {
 //   return parser
 // }
 
+/**
+ * @description pick registry for spec from npm configuration
+ */
 function pickRegistry(
     _spec: string,
     opts: Record<string, string> & {

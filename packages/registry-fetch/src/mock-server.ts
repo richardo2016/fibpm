@@ -15,7 +15,7 @@ type IRoutingMethod = 'get' | 'post' | 'put' | 'patch';
 
 type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 
-type IMatchHeaderFunc = (headerValues: string[]) => boolean;
+type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
 
 export class MockServer {
     routing = new mq.Routing();
@@ -45,15 +45,6 @@ export class MockServer {
     receive(req: Class_HttpRequest) {
         // @warning: never modify to this.routing.invoke(req)
         mq.invoke(this.routing, req);
-
-        return {
-            pipe: (func: (buf: Class_Buffer, resp: Class_HttpResponse) => void) => {
-                const bodyBuf = req.response.readAll();
-                req.response.body.rewind();
-                
-                func(bodyBuf, req.response);
-            }
-        }
     }
 
     _getLastRouteConf() {
@@ -88,7 +79,7 @@ export class MockServer {
 
         conf.routes.push((req) => {
             const headers = req.headers.all(key);
-            if (!func(headers)) {
+            if (!func(headers.length ? headers : null)) {
                 req.end();
             }
         })
@@ -104,7 +95,11 @@ export class MockServer {
         return this._mount(path, 'POST');
     }
 
-    reply(httpCode: Class_HttpResponse['statusCode'], body?: string | object) {
+    reply(httpCode: Class_HttpResponse['statusCode'], body: string | object, {
+        json = true
+    }: {
+        json?: boolean
+    } = {}) {
         if (!this._lastRoute) {
             throw new Error(`[reply] no _lastRoute information! make you call '._mount' before call '.reply'`)
         }
@@ -114,6 +109,9 @@ export class MockServer {
                 req.response.statusCode = httpCode;
                 if (typeof body === 'string') {
                     req.response.body.write(Buffer.from(body))
+                    if (json) {
+                        req.response.setHeader('Content-Type', 'application/json')
+                    }
                 } else {
                     req.response.json(body)
                 }

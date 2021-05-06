@@ -46,13 +46,10 @@ describe("getAuth", () => {
                 return auth[0] === `Basic ${encoded}`
             })
             .get('/hello')
-            .reply(200, 'success')
+            .reply(200, '"success"')
             
-        fetch.jsonMock('/hello', opts)
-            .pipe(ms)
-            .pipe(body => {
-                assert.equal(body, 'success');
-            })
+        const body = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(body, 'success');
     })
 
     it('token auth', () => {
@@ -80,9 +77,8 @@ describe("getAuth", () => {
             .get('/hello')
             .reply(200, '"success"')
 
-        return fetch.jsonMock('/hello', opts)
-            .pipe(ms)
-            .pipe(res => assert.equal(res, '"success"', 'token auth succeeded'))
+        const res = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(res, 'success');
     })
 
     it('forceAuth', () => {
@@ -117,9 +113,8 @@ describe("getAuth", () => {
             .get('/hello')
             .reply(200, '"success"')
         
-        fetch.jsonMock('/hello', opts)
-            .pipe(ms)
-            .pipe(res => assert.equal(res, '"success"', 'used forced auth details'))
+        const res = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(res, 'success')
     })
 
     it('_auth auth', () => {
@@ -142,9 +137,8 @@ describe("getAuth", () => {
             .get('/hello')
             .reply(200, '"success"')
 
-        fetch.jsonMock('/hello', opts)
-            .pipe(ms)
-            .pipe(res => assert.equal(res, '"success"', '_auth auth succeeded'))
+        const res = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(res, 'success')
     })
 
     it('_auth username:pass auth', () => {
@@ -163,13 +157,14 @@ describe("getAuth", () => {
             auth: auth,
         }, 'correct _auth picked out')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', `Basic ${auth}`)
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', '_auth auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock(opts.registry)
+            .matchHeader('authorization', `Basic ${auth}`)
+            .get('/hello')
+            .reply(200, '"success"')
+
+        const res = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(res, 'success')
     })
 
     it('ignore user/pass when _auth is set', () => {
@@ -221,7 +216,7 @@ describe("getAuth", () => {
             token: 'deadbeef',
             isBasicAuth: false,
             auth: null,
-        }, 'correct global auth token picked out')
+        })
 
         const _authConfig = {
             registry: 'https://different.registry/',
@@ -252,57 +247,58 @@ describe("getAuth", () => {
             auth: null,
         }, 'correct auth token picked out')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', 'Bearer c0ffee')
-        //     .matchHeader('npm-otp', otp => {
-        //         t.equal(otp[0], config.otp, 'got the right otp token')
-        //         return otp[0] === config.otp
-        //     })
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'otp auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const ms =nock(opts.registry)
+            .matchHeader('authorization', 'Bearer c0ffee')
+            .matchHeader('npm-otp', otp => {
+                assert.equal(otp[0], config.otp, 'got the right otp token')
+                return otp[0] === config.otp
+            })
+            .get('/hello')
+            .reply(200, '"success"')
+
+        const res = fetch.jsonMock('/hello', opts, req => ms.receive(req));
+        assert.equal(res, 'success')
     })
 
-    // it('different hosts for uri vs registry', () => {
-    //     const config = {
-    //         'always-auth': false,
-    //         registry: 'https://my.custom.registry/here/',
-    //         token: 'deadbeef',
-    //         '//my.custom.registry/here/:_authToken': 'c0ffee',
-    //         '//my.custom.registry/here/:token': 'nope',
-    //     }
+    it('different hosts for uri vs registry', () => {
+        const config = {
+            'always-auth': false,
+            registry: 'https://my.custom.registry/here/',
+            token: 'deadbeef',
+            '//my.custom.registry/here/:_authToken': 'c0ffee',
+            '//my.custom.registry/here/:token': 'nope',
+        }
 
-    //     const opts = Object.assign({}, OPTS, config)
-    //     tnock(t, 'https://some.other.host/')
-    //         .matchHeader('authorization', auth => {
-    //             t.notOk(auth, 'no authorization header was sent')
-    //             return !auth
-    //         })
-    //         .get('/hello')
-    //         .reply(200, '"success"')
-    //     return fetch.json('https://some.other.host/hello', opts)
-    //         .then(res => t.equal(res, 'success', 'token auth succeeded'))
-    // })
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock('https://some.other.host/')
+            .matchHeader('authorization', auth => {
+                assert.notOk(auth, 'no authorization header was sent')
+                return !auth
+            })
+            .get('/hello')
+            .reply(200, '"success"')
+        const res = fetch.jsonMock('https://some.other.host/hello', opts, req => ms.receive(req))
+        assert.equal(res, 'success', 'token auth succeeded')
+    })
 
-    // it('http vs https auth sending', () => {
-    //     const config = {
-    //         'always-auth': false,
-    //         registry: 'https://my.custom.registry/here/',
-    //         token: 'deadbeef',
-    //         '//my.custom.registry/here/:_authToken': 'c0ffee',
-    //         '//my.custom.registry/here/:token': 'nope',
-    //     }
+    it('http vs https auth sending', () => {
+        const config = {
+            'always-auth': false,
+            registry: 'https://my.custom.registry/here/',
+            token: 'deadbeef',
+            '//my.custom.registry/here/:_authToken': 'c0ffee',
+            '//my.custom.registry/here/:token': 'nope',
+        }
 
-    //     const opts = Object.assign({}, OPTS, config)
-    //     tnock(t, 'http://my.custom.registry/here/')
-    //         .matchHeader('authorization', 'Bearer c0ffee')
-    //         .get('/hello')
-    //         .reply(200, '"success"')
-    //     return fetch.json('http://my.custom.registry/here/hello', opts)
-    //         .then(res => t.equal(res, 'success', 'token auth succeeded'))
-    // })
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock('http://my.custom.registry/here/')
+            .matchHeader('authorization', 'Bearer c0ffee')
+            .get('/hello')
+            .reply(200, '"success"')
+        const res = fetch.jsonMock('http://my.custom.registry/here/hello', opts, req => ms.receive(req))
+        assert.equal(res, 'success', 'token auth succeeded')
+    })
 
     it('always-auth', () => {
         const config = {
@@ -319,13 +315,14 @@ describe("getAuth", () => {
             auth: null,
         }, 'correct auth token picked out')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, 'https://some.other.host/')
-        //     .matchHeader('authorization', 'Bearer deadbeef')
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('https://some.other.host/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'token auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock('https://some.other.host/')
+            .matchHeader('authorization', 'Bearer deadbeef')
+            .get('/hello')
+            .reply(200, '"success"')
+
+        const res = fetch.jsonMock('https://some.other.host/hello', opts, req => ms.receive(req))
+        assert.equal(res, 'success', 'token auth succeeded')
     })
 
     it('scope-based auth', () => {
@@ -350,21 +347,24 @@ describe("getAuth", () => {
             token: 'c0ffee',
         }, 'correct auth token picked out without scope config having an @')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, opts['@myscope:registry'])
-        //     .matchHeader('authorization', auth => {
-        //         t.equal(auth[0], 'Bearer c0ffee', 'got correct bearer token for scope')
-        //         return auth[0] === 'Bearer c0ffee'
-        //     })
-        //     .get('/hello')
-        //     .times(2)
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'token auth succeeded'))
-        //     .then(() => fetch.json('/hello', Object.assign({}, opts, {
-        //         scope: 'myscope',
-        //     })))
-        //     .then(res => t.equal(res, 'success', 'token auth succeeded without @ in scope'))
+        const opts = Object.assign({}, OPTS, config)
+
+        const ms = nock(opts['@myscope:registry'])
+            .matchHeader('authorization', auth => {
+                assert.equal(auth[0], 'Bearer c0ffee', 'got correct bearer token for scope')
+                return auth[0] === 'Bearer c0ffee'
+            })
+            .get('/hello')
+            // .times(2)
+            .reply(200, '"success"')
+
+        var res = fetch.jsonMock('/hello', opts, req => ms.receive(req))
+        assert.equal(res, 'success', 'token auth succeeded')
+        
+        var res = fetch.jsonMock('/hello', Object.assign({}, opts, {
+            scope: 'myscope',
+        }), req => ms.receive(req))
+        assert.equal(res, 'success', 'token auth succeeded without @ in scope')
     })
 
     it('auth needs a uri', () => {
