@@ -1,7 +1,22 @@
 const test = require('test');
 test.setup();
 
-const getAuth = require('../lib/auth');
+const getAuth = require('../lib/auth').default;
+
+const { nock } = require('../lib/mock-server');
+const fetch = require('../lib');
+
+const OPTS = {
+    log: console,
+    timeout: 0,
+    // retry: {
+    //     retries: 1,
+    //     factor: 1,
+    //     minTimeout: 1,
+    //     maxTimeout: 10,
+    // },
+    registry: 'https://mock.reg/',
+}
 
 describe("getAuth", () => {
     it('basic auth', () => {
@@ -22,17 +37,22 @@ describe("getAuth", () => {
             auth: Buffer.from('user:pass').toString('base64'),
         }, 'basic auth details generated')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // const encoded = Buffer.from('user:pass', 'utf8').toString('base64')
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', auth => {
-        //         t.equal(auth[0], `Basic ${encoded}`, 'got encoded basic auth')
-        //         return auth[0] === `Basic ${encoded}`
-        //     })
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'basic auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const encoded = Buffer.from('user:pass', 'utf8').toString('base64')
+
+        const ms = nock(config.registry)
+            .matchHeader('authorization', auth => {
+                assert.equal(auth[0], `Basic ${encoded}`)
+                return auth[0] === `Basic ${encoded}`
+            })
+            .get('/hello')
+            .reply(200, 'success')
+            
+        fetch.jsonMock('/hello', opts)
+            .pipe(ms)
+            .pipe(body => {
+                assert.equal(body, 'success');
+            })
     })
 
     it('token auth', () => {
@@ -51,16 +71,18 @@ describe("getAuth", () => {
             auth: null,
         }, 'correct auth token picked out')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', auth => {
-        //         t.equal(auth[0], 'Bearer c0ffee', 'got correct bearer token')
-        //         return auth[0] === 'Bearer c0ffee'
-        //     })
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'token auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock(opts.registry)
+            .matchHeader('authorization', auth => {
+                assert.equal(auth[0], 'Bearer c0ffee', 'got correct bearer token')
+                return auth[0] === 'Bearer c0ffee'
+            })
+            .get('/hello')
+            .reply(200, '"success"')
+
+        return fetch.jsonMock('/hello', opts)
+            .pipe(ms)
+            .pipe(res => assert.equal(res, '"success"', 'token auth succeeded'))
     })
 
     it('forceAuth', () => {
@@ -84,17 +106,20 @@ describe("getAuth", () => {
             auth: Buffer.from('user:pass').toString('base64'),
         }, 'only forceAuth details included')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // const encoded = Buffer.from('user:pass', 'utf8').toString('base64')
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', auth => {
-        //         t.equal(auth[0], `Basic ${encoded}`, 'got encoded basic auth')
-        //         return auth[0] === `Basic ${encoded}`
-        //     })
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', 'used forced auth details'))
+        const opts = Object.assign({}, OPTS, config)
+        const encoded = Buffer.from('user:pass', 'utf8').toString('base64')
+
+        const ms = nock(opts.registry)
+            .matchHeader('authorization', auth => {
+                assert.equal(auth[0], `Basic ${encoded}`, 'got encoded basic auth')
+                return auth[0] === `Basic ${encoded}`
+            })
+            .get('/hello')
+            .reply(200, '"success"')
+        
+        fetch.jsonMock('/hello', opts)
+            .pipe(ms)
+            .pipe(res => assert.equal(res, '"success"', 'used forced auth details'))
     })
 
     it('_auth auth', () => {
@@ -111,13 +136,15 @@ describe("getAuth", () => {
             auth: 'c0ffee',
         }, 'correct _auth picked out')
 
-        // const opts = Object.assign({}, OPTS, config)
-        // tnock(t, opts.registry)
-        //     .matchHeader('authorization', 'Basic c0ffee')
-        //     .get('/hello')
-        //     .reply(200, '"success"')
-        // return fetch.json('/hello', opts)
-        //     .then(res => t.equal(res, 'success', '_auth auth succeeded'))
+        const opts = Object.assign({}, OPTS, config)
+        const ms = nock(opts.registry)
+            .matchHeader('authorization', 'Basic c0ffee')
+            .get('/hello')
+            .reply(200, '"success"')
+
+        fetch.jsonMock('/hello', opts)
+            .pipe(ms)
+            .pipe(res => assert.equal(res, '"success"', '_auth auth succeeded'))
     })
 
     it('_auth username:pass auth', () => {

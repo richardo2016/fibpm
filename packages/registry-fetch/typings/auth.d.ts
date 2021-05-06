@@ -1,5 +1,7 @@
+import { IOptions } from './default-opts';
 declare type IKvs = Record<string, string>;
-declare type IGetAuthOpts = IKvs & {
+export declare type IGetAuthOpts = IKvs & {
+    log?: IOptions['log'];
     forceAuth?: IKvs;
 };
 declare const getAuth: (uri: string, opts?: IGetAuthOpts) => Auth;
@@ -28,4 +30,4 @@ declare class Auth {
     isBasicAuth: boolean;
     constructor({ token, auth, username, password, scopeAuthKey }: IAuthConstructorOpts);
 }
-export = getAuth;
+export default getAuth;

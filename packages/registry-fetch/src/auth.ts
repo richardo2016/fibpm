@@ -9,6 +9,7 @@
 import url = require('url');
 
 import npa = require('npm-package-arg')
+import { IOptions } from './default-opts';
 
 /** @description specifiction of package, such as `foo@2.0.0` */
 type IPackageSpec = string
@@ -58,7 +59,8 @@ const getRegistry = (opts: IKvs & {
     return scopeReg || opts.registry
 }
 
-type IGetAuthOpts = IKvs & {
+export type IGetAuthOpts = IKvs & {
+    log?: IOptions['log']
     forceAuth?: IKvs
 }
 
@@ -149,4 +151,4 @@ class Auth {
     }
 }
 
-export = getAuth;
+export default getAuth;
