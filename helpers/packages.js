@@ -23,6 +23,10 @@ module.exports = [
         name: 'i-tarball',
         _dirname: 'i-tarball',
     },
+    {
+        name: 'registry-fetch',
+        _dirname: 'registry-fetch',
+    },
     /* internal module :start */
     {
         name: 'fibpm',
