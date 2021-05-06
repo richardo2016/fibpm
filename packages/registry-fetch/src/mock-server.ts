@@ -17,6 +17,9 @@ type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 
 type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
 
+/**
+ * @see {@link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses}
+ */
 const HTTP_STATUS_MESSAGE: {[p: number]: string} = {
     200: 'OK',
     400: 'Bad Request',
