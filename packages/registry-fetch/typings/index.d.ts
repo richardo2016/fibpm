@@ -1,11 +1,14 @@
 /// <reference types="@fibjs/types" />
-import { IGetAuthOpts } from './auth';
+import { MockServer } from './mock-server';
 import { IOptions } from './default-opts';
-declare type IRegFetchOptions = IOptions & IGetAuthOpts & IGetCacheModeOpts & {
-    spec?: string;
+import { ISpecInOptions } from './_types';
+declare type IRegFetchOptions = IOptions & IGetCacheModeOpts & {
+    spec?: ISpecInOptions;
+    otp?: string;
     body?: object;
     gzip?: boolean;
     query?: object;
+    otpPrompt?: () => string;
 };
 declare type IMockResponse = (req: Class_HttpRequest) => void;
 /**
@@ -16,9 +19,10 @@ declare type IMockResponse = (req: Class_HttpRequest) => void;
  */
 declare function regFetch(uri: string, opts_: IRegFetchOptions, onRequest?: IMockResponse): Class_HttpResponse;
 declare namespace regFetch {
+    var mock: (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => Class_HttpResponse;
     var json: (uri: string, opts: IRegFetchOptions) => any;
-    var jsonMock: (uri: string, opts: IRegFetchOptions, mockResponse: IMockResponse) => any;
-    var pickRegistry: (_spec: string, opts?: Record<string, string> & {
+    var jsonMock: (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => any;
+    var pickRegistry: (_spec: ISpecInOptions, opts?: Record<string, string> & {
         scope?: string;
     }) => string;
 }

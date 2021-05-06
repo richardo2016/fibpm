@@ -1,17 +1,15 @@
 import { HttpErrorAuthOTP } from './errors'
 import checkResponse = require('./check-response')
 import getAuth, { IGetAuthOpts } from './auth';
-// import fetch = require('make-fetch-happen')
-// import JSONStream = require('minipass-json-stream')
 import npa = require('npm-package-arg')
 import http = require('http')
 import qs = require('querystring')
 import url = require('url')
-// import zlib = require('minizlib')
 import zlib = require('zlib')
+import { MockServer } from './mock-server'
 
 import defaultOpts, { IOptions } from './default-opts';
-import type { MockServer } from './mock-server';
+import { ISpecInOptions } from './_types';
 
 // check if request url valid
 const urlIsValid = (u: string) => {
@@ -19,11 +17,13 @@ const urlIsValid = (u: string) => {
     return !!(parsed.hostname && parsed.host)
 }
 
-type IRegFetchOptions = IOptions & IGetAuthOpts & IGetCacheModeOpts & {
-    spec?: string
+type IRegFetchOptions = IOptions & IGetCacheModeOpts & {
+    spec?: ISpecInOptions
+    otp?: string
     body?: object
     gzip?: boolean
     query?: object
+    otpPrompt?: () => string
 };
 type IMockResponse = (req: Class_HttpRequest) => void;
 /**
@@ -36,7 +36,7 @@ function regFetch(
     uri: string,
     opts_: IRegFetchOptions,
     onRequest?: IMockResponse
-) {
+): Class_HttpResponse {
     const opts = {
         ...defaultOpts,
         ...opts_,
@@ -78,7 +78,6 @@ function regFetch(
 
     if (opts.gzip) {
         headers['content-encoding'] = 'gzip'
-        // TODO: 可能有问题
         body = zlib.gzip(Buffer.from(body.toString()));
     }
 
@@ -104,6 +103,8 @@ function regFetch(
         opts.preferOnline = true
     }
 
+    let resp: Class_HttpResponse;
+
     if (onRequest) {
         httpRequest.method = opts.method;
         httpRequest.setHeader(headers);
@@ -114,63 +115,66 @@ function regFetch(
 
         onRequest(httpRequest);
 
-        return httpRequest.response;
+        resp = httpRequest.response;
+    } else {
+        const client = new http.Client();
+        resp = client.request(opts.method, uri, {
+            body,
+            headers,
+        });
     }
 
-    const client = new http.Client();
-    return client.request(opts.method, uri, {
-        body,
-        headers,
-    });
+    try {
+        checkResponse({
+            method,
+            uri,
+            res: resp,
+            registry,
+            startTime,
+            auth,
+            opts,
+        });
+    } catch (error) {
+        if (error instanceof HttpErrorAuthOTP && typeof opts.otpPrompt === 'function') {
+            // if otp fails to complete, we fail with that failure
+            const otp = opts.otpPrompt()
+            // if no otp provided, throw the original HTTP error
+            if (!otp)
+                throw error
 
-    // if (typeof opts.otpPrompt === 'function') {
-    //     return p.catch(async er => {
-    //         if (er instanceof HttpErrorAuthOTP) {
-    //             // if otp fails to complete, we fail with that failure
-    //             const otp = await opts.otpPrompt()
-    //             // if no otp provided, throw the original HTTP error
-    //             if (!otp)
-    //                 throw er
-    //             return regFetch(uri, { ...opts, otp })
-    //         }
-    //         throw er
-    //     })
-    // } else
-    //     return p
+            return regFetch(uri, { ...opts, otp }, onRequest)
+        }
+
+        throw error;
+    }
+
+    return resp
 }
 
 export = regFetch;
+
+regFetch.mock = (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => {
+    return regFetch(uri, opts, mockResponse instanceof MockServer ? req => mockResponse.receive(req) : mockResponse);
+}
 
 regFetch.json = (uri: string, opts: IRegFetchOptions) => {
   return regFetch(uri, opts).json();
 }
 
-regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, mockResponse: IMockResponse) => {
-    return regFetch(uri, opts, mockResponse).json();
+regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => {
+    return regFetch.mock(uri, opts, mockResponse).json();
 }
-
-// fetchJSON.stream = fetchJSONStream
-// function fetchJSONStream (uri, jsonPath, /* istanbul ignore next */ opts_ = {}) {
-//   const opts = { ...defaultOpts, ...opts_ }
-//   const parser = JSONStream.parse(jsonPath, opts.mapJSON)
-//   regFetch(uri, opts).then(res =>
-//     res.body.on('error',
-//       /* istanbul ignore next: unlikely and difficult to test */
-//       er => parser.emit('error', er)).pipe(parser)
-//   ).catch(er => parser.emit('error', er))
-//   return parser
-// }
 
 /**
  * @description pick registry for spec from npm configuration
  */
 function pickRegistry(
-    _spec: string,
+    _spec: ISpecInOptions,
     opts: Record<string, string> & {
         scope?: string
     } = {}
 ) {
-    const spec = npa(_spec)
+    const spec = npa(_spec as any)
     let registry = spec.scope &&
         opts[spec.scope.replace(/^@?/, '@') + ':registry']
 
@@ -190,6 +194,7 @@ type IGetCacheModeOpts = {
     preferOffline?: boolean
     preferOnline?: boolean
 };
+// TODO: support it
 function getCacheMode(opts: IGetCacheModeOpts) {
     return opts.offline ? 'only-if-cached'
         : opts.preferOffline ? 'force-cache'

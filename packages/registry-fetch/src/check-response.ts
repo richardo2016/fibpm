@@ -1,15 +1,16 @@
-import errors = require('./errors.js')
+import errors = require('./errors')
 import util = require('util')
 import _url = require('url')
+import io = require('io')
 import http = require('http')
-// import { Response } = require('minipass-fetch')
 import defaultOpts, { IOptions } from './default-opts'
 
 import IGetAuth from './auth';
+import { ISpecInOptions } from './_types'
 
 type ICheckResponseOpts = Partial<IOptions> & {
     ignoreBody?: boolean
-    spec?: string
+    spec?: ISpecInOptions
     url?: string
 }
 
@@ -23,7 +24,7 @@ type IResponseInfo = {
     opts: ICheckResponseOpts
 };
 
-const checkResponse = async ({
+const checkResponse = ({
     method,
     uri,
     res,
@@ -50,18 +51,11 @@ Scoped Registry Key: ${auth.scopeAuthKey}
 
 More info here: https://github.com/npm/cli/wiki/No-auth-for-URI,-but-auth-present-for-scoped-registry`)
         }
-        return checkErrors(method, res, startTime, opts)
+        return checkErrors(method, res, startTime, {...opts, url: uri})
     } else {
         // res.body.on('end', () => logRequest(method, res, startTime, opts))
         if (opts.ignoreBody) {
-            res.end()
-            //   res.body.resume()
-            const newres = new http.Response();
-            newres.headers = res.headers.toJSON();
-            newres.body = null;
-            newres.params = Array.from(res.params);
-
-            return newres;
+            res.body.truncate(0);
         }
         return res
     }
@@ -148,37 +142,40 @@ function checkErrors(
     startTime: number,
     opts: ICheckResponseOpts
 ) {
-    let parsed = null
+    let parsed = null;
+
     let body = res.body.readAll();
+    res.body.rewind();
 
     try {
         parsed = JSON.parse(body.toString('utf8'));
     } catch (e) { }
+
     if (res.statusCode === 401 && res.headers.first('www-authenticate')) {
         const auth = res.headers.first('www-authenticate')
             .split(/,\s*/)
             .map((s: string) => s.toLowerCase())
         if (auth.indexOf('ipaddress') !== -1) {
             throw new errors.HttpErrorAuthIPAddress(
-                method, res, parsed, { spec: opts.spec }
+                method, res, parsed, opts
             )
         } else if (auth.indexOf('otp') !== -1) {
             throw new errors.HttpErrorAuthOTP(
-                method, res, parsed, { spec: opts.spec }
+                method, res, parsed, opts
             )
         } else {
             throw new errors.HttpErrorAuthUnknown(
-                method, res, parsed, { spec: opts.spec }
+                method, res, parsed, opts
             )
         }
     } else if (res.statusCode === 401 && body != null && /one-time pass/.test(body.toString('utf8'))) {
         // Heuristic for malformed OTP responses that don't include the www-authenticate header.
         throw new errors.HttpErrorAuthOTP(
-            method, res, parsed, { spec: opts.spec }
+            method, res, parsed, opts
         )
     } else {
         throw new errors.HttpErrorGeneral(
-            method, res, parsed, { spec: opts.spec }
+            method, res, parsed, opts
         )
     }
 }

@@ -9,5 +9,6 @@ export declare type ILogHost = {
     pause: (...args: any[]) => void;
     resume: (...args: any[]) => void;
 };
+export declare const mockLog: ILogHost;
 declare const _default: ILogHost;
 export default _default;

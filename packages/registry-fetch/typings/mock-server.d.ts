@@ -10,6 +10,10 @@
 declare type IHttpVerb = 'GET' | 'POST' | 'PUT' | 'PATCH';
 declare type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 declare type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
+declare type IMockServerReplyFunc = (httpCode: Class_HttpResponse['statusCode'], body: string | object, headers?: Record<string, string>, options?: {
+    json?: boolean;
+}) => void;
+declare type IMockServerReplyParams = Parameters<IMockServerReplyFunc>;
 export declare class MockServer {
     routing: Class_Routing;
     subRoutings: Class_Routing;
@@ -30,9 +34,7 @@ export declare class MockServer {
     matchHeader(key: string, valueOrGetValue: string | IMatchHeaderFunc): this;
     get(path: string): this;
     post(path: string): this;
-    reply(httpCode: Class_HttpResponse['statusCode'], body: string | object, { json }?: {
-        json?: boolean;
-    }): this;
+    reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]): this;
 }
 export declare function nock(hostBase: string): MockServer;
 export {};

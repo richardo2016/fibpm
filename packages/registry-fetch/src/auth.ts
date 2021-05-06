@@ -59,10 +59,10 @@ const getRegistry = (opts: IKvs & {
     return scopeReg || opts.registry
 }
 
-export type IGetAuthOpts = IKvs & {
+export type IGetAuthOpts = {
     log?: IOptions['log']
     forceAuth?: IKvs
-}
+} & IKvs
 
 const getAuth = (uri: string, opts: IGetAuthOpts = {}): Auth => {
     const { forceAuth } = opts

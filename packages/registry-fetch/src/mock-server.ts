@@ -17,6 +17,22 @@ type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 
 type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
 
+const HTTP_STATUS_MESSAGE: {[p: number]: string} = {
+    200: 'OK',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+}
+
+type IMockServerReplyFunc = (
+    httpCode: Class_HttpResponse['statusCode'],
+    body: string | object,
+    headers?: Record<string, string>,
+    options?: {
+        json?: boolean
+    }
+) => void
+type IMockServerReplyParams = Parameters<IMockServerReplyFunc>;
+
 export class MockServer {
     routing = new mq.Routing();
     subRoutings = new mq.Routing();
@@ -95,18 +111,38 @@ export class MockServer {
         return this._mount(path, 'POST');
     }
 
-    reply(httpCode: Class_HttpResponse['statusCode'], body: string | object, {
-        json = true
-    }: {
-        json?: boolean
-    } = {}) {
+    reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]) {        
         if (!this._lastRoute) {
             throw new Error(`[reply] no _lastRoute information! make you call '._mount' before call '.reply'`)
         }
 
         this._lastRoute.routes.push(
             (req: Class_HttpRequest) => {
+                let params: IMockServerReplyParams
+                if (typeof args[0] === 'function') {
+                    params = args[0].apply(null, [req]);
+                } else {
+                    params = args as IMockServerReplyParams;
+                }
+
+                const [
+                    httpCode,
+                    body,
+                    headers = {},
+                    {
+                        json = true
+                    } = {}
+                ] = params || [];
+
+                req.response.setHeader(headers);              
                 req.response.statusCode = httpCode;
+
+                if (HTTP_STATUS_MESSAGE[httpCode]) {
+                    req.response.statusMessage = HTTP_STATUS_MESSAGE[httpCode];
+                } else {
+                    throw new Error(`unsupport http status code ${httpCode}`);
+                }
+                
                 if (typeof body === 'string') {
                     req.response.body.write(Buffer.from(body))
                     if (json) {

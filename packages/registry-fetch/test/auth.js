@@ -5,9 +5,10 @@ const getAuth = require('../lib/auth').default;
 
 const { nock } = require('../lib/mock-server');
 const fetch = require('../lib');
+const { mockLog } = require('../lib/slilent-log');
 
 const OPTS = {
-    log: console,
+    log: mockLog,
     timeout: 0,
     // retry: {
     //     retries: 1,

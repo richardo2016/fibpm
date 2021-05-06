@@ -1,4 +1,5 @@
 import url = require('url')
+import { ISpecInOptions } from './_types'
 
 function packageName(href: string): string | undefined {
     try {
@@ -18,10 +19,11 @@ function packageName(href: string): string | undefined {
 }
 
 type IErrorOpts = {
-    url?: string, spec?: string
+    url?: string,
+    spec?: ISpecInOptions
 };
 
-type IBodyObject = object & {
+type IBodyError = Class_Buffer & {
     error?: string
 }
 
@@ -32,13 +34,13 @@ export class HttpErrorBase extends Error {
     code: string
     method: string
     uri: string
-    body: IBodyObject
+    body: Class_Buffer | IBodyError
     pkgid: string
 
     constructor(
         method: string,
         res: Class_HttpResponse,
-        body: IBodyObject,
+        body: IBodyError,
         opts: IErrorOpts
     ) {
         super()
@@ -48,7 +50,8 @@ export class HttpErrorBase extends Error {
         this.code = `E${res.statusCode}`
         this.method = method
         this.uri = opts?.url
-        this.body = body
+        this.body = body || res.body.readAll();
+        // res.body.readAll()
         this.pkgid = opts?.spec ? opts?.spec.toString() : packageName(opts?.url)
     }
 }
@@ -58,7 +61,7 @@ export class HttpErrorGeneral extends HttpErrorBase {
     constructor(
         method: string,
         res: Class_HttpResponse,
-        body: IBodyObject,
+        body: IBodyError,
         opts: IErrorOpts
     ) {
         super(method, res, body, opts)
@@ -75,7 +78,7 @@ export class HttpErrorAuthOTP extends HttpErrorBase {
     constructor(
         method: string,
         res: Class_HttpResponse,
-        body: IBodyObject,
+        body: IBodyError,
         opts: IErrorOpts
     ) {
         super(method, res, body, opts)
@@ -90,7 +93,7 @@ export class HttpErrorAuthIPAddress extends HttpErrorBase {
     constructor(
         method: string,
         res: Class_HttpResponse,
-        body: IBodyObject,
+        body: IBodyError,
         opts: IErrorOpts
     ) {
         super(method, res, body, opts)
@@ -105,7 +108,7 @@ export class HttpErrorAuthUnknown extends HttpErrorBase {
     constructor(
         method: string,
         res: Class_HttpResponse,
-        body: IBodyObject,
+        body: IBodyError,
         opts: IErrorOpts
     ) {
         super(method, res, body, opts)

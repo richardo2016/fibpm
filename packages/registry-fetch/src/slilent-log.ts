@@ -12,6 +12,18 @@ export type ILogHost = {
 
 const noop = Function.prototype
 
+export const mockLog: ILogHost =  {
+  error: console.error.bind(this),
+  warn: console.warn.bind(this),
+  notice: console.notice.bind(this),
+  info: console.info.bind(this),
+  verbose: console.debug.bind(this),
+  silly: console.notice.bind(this, 'silly'),
+  http: console.notice.bind(this, 'http'),
+  pause: console.notice.bind(this, 'pause'),
+  resume: console.notice.bind(this, 'resume'),
+}
+
 export default {
   error: noop,
   warn: noop,
