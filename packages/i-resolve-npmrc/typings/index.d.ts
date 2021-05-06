@@ -18,6 +18,9 @@ interface ParsedNpmrcInfo {
         [k: string]: string;
     };
 }
+export declare function parseInI(input: string): {
+    [key: string]: any;
+};
 /**
  * @description parse found rc config file
  *

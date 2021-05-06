@@ -1,9 +1,8 @@
 import fs = require('fs')
 import path = require('path')
-import os = require('os')
 import url = require('url')
 import querystring = require('querystring')
-import util = require('util')
+import ini = require('ini')
 
 const DFLT_RC_FILENAME = '.npmrc'
 const CWD = process.cwd()
@@ -57,10 +56,11 @@ interface ParsedNpmrcInfo {
     npm_configs: {
         [k: string]: string
     }
-    // [k: string]: any
 }
 
-const KV_TUPLE_LINE = /^([^=]+)=([^=]*)$/
+export function parseInI (input: string) {
+    return ini.parse(input);
+} 
 
 /**
  * @description parse found rc config file
@@ -75,31 +75,27 @@ export function parseNpmrc (
         auths: [],
         npm_configs: {}
     }
-    let rcLines: string[] = []
 
-    if (configPath) {
-        try {
-            rcLines = fs.readTextFile(configPath).replace(/(\r\n)/g, '\n').split('\n');
-            rcConfig.filename = configPath
-            rcConfig.config_existed = true
-        } catch (error) {}
+    if (!fs.exists(configPath)) {
+        return rcConfig;
     }
 
-    rcLines.forEach((rcLine, lineNo) => {
-        // empty line
-        if (!rcLine.trim()) return ;
-        // comment line
-        if (rcLine.startsWith('#')) return ;
+    rcConfig.filename = configPath;
+    rcConfig.config_existed = true;
 
-        // parse //<hostname>/
-        if (rcLine.startsWith('//')) {
-            rcConfig.auths.push(parseAuthUrl(rcLine))
-        } else if (KV_TUPLE_LINE.test(rcLine)) {
-            util.extend(rcConfig.npm_configs, tryParseKvs(rcLine))
+    const fileContent = fs.readTextFile(configPath);
+
+    const parsed = ini.parse(fileContent);
+
+    Object.keys(parsed).forEach((key) => {
+        const value = parsed[key];
+
+        if (key.startsWith('//')) {
+            rcConfig.auths.push(parseAuthUrl(`${key}=${value}`))
         } else {
-            throw new Error(`unexpected line '${rcLine}' in rc config file ${configPath}:L${lineNo}`)
+            rcConfig.npm_configs[key] = value;
         }
-    })
+    });
 
     return rcConfig
 };
@@ -113,8 +109,8 @@ function tryParseKvs (input: string) {
     return kvs
 }
 
-function parseAuthUrl (rcLine: string): ParsedNpmrcInfo['auths'][any] {
-    const urlinfo = url.parse(rcLine, false, true)
+function parseAuthUrl (rcKvLine: string): ParsedNpmrcInfo['auths'][any] {
+    const urlinfo = url.parse(rcKvLine, false, true)
     const kvstring = urlinfo.pathname.replace(/^\//, '')
     const kvs = tryParseKvs(kvstring)
 

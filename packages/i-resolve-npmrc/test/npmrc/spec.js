@@ -31,7 +31,7 @@ describe("parseNpmrc", () => {
     function pickFields (obj, fields = ['config_existed', 'auths', 'npm_configs']) {
         return util.pick(obj, fields)
     }
-    it.only("sample1", () => {
+    it("sample1", () => {
         assert.deepEqual(
             pickFields(
                 parseNpmrc(getUnitTestRelpath('./sample1/.npmrc')),
@@ -45,7 +45,7 @@ describe("parseNpmrc", () => {
                     "authToken": "f23f4580-9ec3-11ea-bb37-0242ac130002"
                 }],
                 "npm_configs": {
-                    "strict-ssl": "true"
+                    "strict-ssl": true
                 }
             }
         )
@@ -65,7 +65,7 @@ describe("parseNpmrc", () => {
                     "authToken": "50b48678-9ec6-11ea-bb37-0242ac130002"
                 }],
                 "npm_configs": {
-                    "strict-ssl": "false",
+                    "strict-ssl": false,
                     "registry": "registry.npmjs.com"
                 }
             }
