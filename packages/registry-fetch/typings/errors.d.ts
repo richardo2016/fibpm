@@ -1,5 +1,5 @@
 /// <reference types="@fibjs/types" />
-import { ISpecInOptions } from './_types';
+import { INpmHttpResponse, ISpecInOptions } from './_types';
 declare type IErrorOpts = {
     url?: string;
     spec?: ISpecInOptions;
@@ -16,19 +16,19 @@ export declare class HttpErrorBase extends Error {
     uri: string;
     body: Class_Buffer | IBodyError;
     pkgid: string;
-    constructor(method: string, res: Class_HttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
 }
 export declare class HttpErrorGeneral extends HttpErrorBase {
     spec: string;
-    constructor(method: string, res: Class_HttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
 }
 export declare class HttpErrorAuthOTP extends HttpErrorBase {
-    constructor(method: string, res: Class_HttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
 }
 export declare class HttpErrorAuthIPAddress extends HttpErrorBase {
-    constructor(method: string, res: Class_HttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
 }
 export declare class HttpErrorAuthUnknown extends HttpErrorBase {
-    constructor(method: string, res: Class_HttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
 }
 export {};

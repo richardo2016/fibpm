@@ -9,7 +9,7 @@ import zlib = require('zlib')
 import { MockServer } from './mock-server'
 
 import defaultOpts, { IOptions } from './default-opts';
-import { ISpecInOptions } from './_types';
+import { INpmHttpResponse, ISpecInOptions } from './_types';
 
 // check if request url valid
 const urlIsValid = (u: string) => {
@@ -36,7 +36,7 @@ function regFetch(
     uri: string,
     opts_: IRegFetchOptions,
     onRequest?: IMockResponse
-): Class_HttpResponse {
+): INpmHttpResponse {
     const opts = {
         ...defaultOpts,
         ...opts_,
@@ -103,7 +103,7 @@ function regFetch(
         opts.preferOnline = true
     }
 
-    let resp: Class_HttpResponse;
+    let resp: INpmHttpResponse;
 
     if (onRequest) {
         httpRequest.method = opts.method;
@@ -115,14 +115,16 @@ function regFetch(
 
         onRequest(httpRequest);
 
-        resp = httpRequest.response;
+        resp = httpRequest.response as INpmHttpResponse;
     } else {
         const client = new http.Client();
         resp = client.request(opts.method, uri, {
             body,
             headers,
-        });
+        }) as INpmHttpResponse;
     }
+
+    resp.url = uri;
 
     try {
         checkResponse({

@@ -5,7 +5,7 @@ const getAuth = require('../lib/auth').default;
 
 const { nock } = require('../lib/mock-server');
 const fetch = require('../lib');
-const { mockLog } = require('../lib/slilent-log');
+const { mockLog } = require('../lib/silentlog');
 
 const OPTS = {
     log: mockLog,

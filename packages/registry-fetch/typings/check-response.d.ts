@@ -1,7 +1,6 @@
-/// <reference types="@fibjs/types" />
 import { IOptions } from './default-opts';
 import IGetAuth from './auth';
-import { ISpecInOptions } from './_types';
+import { INpmHttpResponse, ISpecInOptions } from './_types';
 declare type ICheckResponseOpts = Partial<IOptions> & {
     ignoreBody?: boolean;
     spec?: ISpecInOptions;
@@ -10,11 +9,11 @@ declare type ICheckResponseOpts = Partial<IOptions> & {
 declare type IResponseInfo = {
     method: IOptions['method'];
     uri: string;
-    res: Class_HttpResponse;
+    res: INpmHttpResponse;
     registry: string;
     startTime: number;
     auth: ReturnType<typeof IGetAuth>;
     opts: ICheckResponseOpts;
 };
-declare const checkResponse: ({ method, uri, res, registry, startTime, auth, opts }: IResponseInfo) => void | Class_HttpResponse;
+declare const checkResponse: ({ method, uri, res, registry, startTime, auth, opts }: IResponseInfo) => void | INpmHttpResponse;
 export = checkResponse;

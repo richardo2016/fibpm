@@ -4,7 +4,7 @@ test.setup();
 const npa = require('npm-package-arg')
 const { nock } = require('../lib/mock-server');
 const errors = require('../lib/errors.js')
-const { mockLog } = require('../lib/slilent-log');
+const { mockLog } = require('../lib/silentlog');
 
 const fetch = require('../')
 

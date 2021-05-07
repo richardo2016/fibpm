@@ -24,7 +24,16 @@ export const mockLog: ILogHost =  {
   resume: console.notice.bind(this, 'resume'),
 }
 
-export default {
+export function makeAuthMissingLog (uri: string, scopeAuthKey: string) {
+  return `No auth for URI, but auth present for scoped registry.
+
+URI: ${uri}
+Scoped Registry Key: ${scopeAuthKey}
+
+More info here: https://github.com/npm/cli/wiki/No-auth-for-URI,-but-auth-present-for-scoped-registry`
+}
+
+export const silentLog = {
   error: noop,
   warn: noop,
   notice: noop,
@@ -35,3 +44,5 @@ export default {
   pause: noop,
   resume: noop,
 } as ILogHost;
+
+export default silentLog

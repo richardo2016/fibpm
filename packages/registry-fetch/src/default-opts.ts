@@ -1,5 +1,5 @@
 const pkg = require('../package.json')
-import silentlog, { ILogHost } from './slilent-log';
+import { silentLog, ILogHost } from './silentlog';
 
 export type IOptions = {
     log: ILogHost,
@@ -12,7 +12,7 @@ export type IOptions = {
 }
 
 export default {
-    log: silentlog,
+    log: silentLog,
     method: 'GET',
     registry: 'https://registry.npmjs.org/',
     timeout: 5 * 60 * 1000, // 5 minutes

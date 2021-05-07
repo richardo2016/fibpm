@@ -1,4 +1,4 @@
-import { ILogHost } from './slilent-log';
+import { ILogHost } from './silentlog';
 export declare type IOptions = {
     log: ILogHost;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';

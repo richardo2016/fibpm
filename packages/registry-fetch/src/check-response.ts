@@ -1,12 +1,11 @@
 import errors = require('./errors')
 import util = require('util')
 import _url = require('url')
-import io = require('io')
-import http = require('http')
 import defaultOpts, { IOptions } from './default-opts'
 
 import IGetAuth from './auth';
-import { ISpecInOptions } from './_types'
+import { INpmHttpResponse, ISpecInOptions } from './_types'
+import { makeAuthMissingLog } from './silentlog';
 
 type ICheckResponseOpts = Partial<IOptions> & {
     ignoreBody?: boolean
@@ -17,7 +16,7 @@ type ICheckResponseOpts = Partial<IOptions> & {
 type IResponseInfo = {
     method: IOptions['method'],
     uri: string,
-    res: Class_HttpResponse,
+    res: INpmHttpResponse,
     registry: string,
     startTime: number,
     auth: ReturnType<typeof IGetAuth>,
@@ -41,19 +40,16 @@ const checkResponse = ({
     if (res.statusCode >= 400) {
         logRequest(method, res, startTime, opts)
         if (auth && auth.scopeAuthKey && !auth.token && !auth.auth) {
+
             // we didn't have auth for THIS request, but we do have auth for
             // requests to the registry indicated by the spec's scope value.
             // Warn the user.
-            opts.log.warn('registry', `No auth for URI, but auth present for scoped registry.
-
-URI: ${uri}
-Scoped Registry Key: ${auth.scopeAuthKey}
-
-More info here: https://github.com/npm/cli/wiki/No-auth-for-URI,-but-auth-present-for-scoped-registry`)
+            opts.log.warn('registry', makeAuthMissingLog(uri, auth.scopeAuthKey))
         }
-        return checkErrors(method, res, startTime, {...opts, url: uri})
+        return checkErrors(method, res, startTime, { ...opts, url: uri })
     } else {
-        // res.body.on('end', () => logRequest(method, res, startTime, opts))
+        // TODO: it record end time of response, maybe fibjs should support listeners on http stream 'end'
+        logRequest(method, res, startTime, opts)
         if (opts.ignoreBody) {
             res.body.truncate(0);
         }
@@ -64,9 +60,10 @@ export = checkResponse
 
 function logRequest(
     method: IOptions['method'],
-    res: Class_HttpResponse,
+    res: INpmHttpResponse,
     startTime: number,
-    opts: ICheckResponseOpts) {
+    opts: ICheckResponseOpts
+) {
     const elapsedTime = Date.now() - startTime
     const attempt = res.headers.first('x-fetch-attempts')
     const attemptStr = attempt && attempt > 1 ? ` attempt #${attempt}` : ''
@@ -74,7 +71,7 @@ function logRequest(
 
     let urlStr
     try {
-        const url = _url.parse(opts.url)
+        const url = _url.parse(opts.url || res.url)
         if (url.password)
             url.password = '***'
 
@@ -92,32 +89,36 @@ function logRequest(
 const WARNING_REGEXP = /^\s*(\d{3})\s+(\S+)\s+"(.*)"\s+"([^"]+)"/
 const BAD_HOSTS = new util.LruCache(50)
 
+function arraify<T>(itemOrList: T | T[]): T[] {
+    return Array.isArray(itemOrList) ? itemOrList : [itemOrList];
+}
+
 function checkWarnings(
-    res: Class_HttpResponse,
+    res: INpmHttpResponse,
     registry: string,
     opts: ICheckResponseOpts
 ) {
     if (res.headers.has('warning') && !BAD_HOSTS.has(registry)) {
         const warnings: Record<string, any> = {}
-        // note: headers.raw() will preserve case, so we might have a
+        // note: value will preserve case, so we might have a
         // key on the object like 'WaRnInG' if that was used first
-        for (const [key, value] of Object.entries(res.headers.all() as {[k: string]: string[]})) {
+        for (const [key, value] of Object.entries(res.headers.all() as { [k: string]: string | string[] })) {
             if (key.toLowerCase() !== 'warning')
                 continue
 
-            console.log('key is', key);
-            console.log('value is', key);
-            // value.forEach(w => {
-            //     const match = w.match(WARNING_REGEXP)
-            //     if (match) {
-            //         warnings[match[1]] = {
-            //             code: match[1],
-            //             host: match[2],
-            //             message: match[3],
-            //             date: new Date(match[4]),
-            //         }
-            //     }
-            // })
+            const values = arraify(value);
+
+            values.forEach(w => {
+                const match = w.match(WARNING_REGEXP)
+                if (match) {
+                    warnings[match[1]] = {
+                        code: match[1],
+                        host: match[2],
+                        message: match[3],
+                        date: new Date(match[4]),
+                    }
+                }
+            })
         }
         BAD_HOSTS.set(registry, true)
         if (warnings['199']) {
@@ -138,7 +139,7 @@ function checkWarnings(
 
 function checkErrors(
     method: IOptions['method'],
-    res: Class_HttpResponse,
+    res: INpmHttpResponse,
     startTime: number,
     opts: ICheckResponseOpts
 ) {

@@ -1,5 +1,5 @@
 import url = require('url')
-import { ISpecInOptions } from './_types'
+import { INpmHttpResponse, ISpecInOptions } from './_types'
 
 function packageName(href: string): string | undefined {
     try {
@@ -39,7 +39,7 @@ export class HttpErrorBase extends Error {
 
     constructor(
         method: string,
-        res: Class_HttpResponse,
+        res: INpmHttpResponse,
         body: IBodyError,
         opts: IErrorOpts
     ) {
@@ -49,7 +49,7 @@ export class HttpErrorBase extends Error {
         this.statusCode = res.statusCode
         this.code = `E${res.statusCode}`
         this.method = method
-        this.uri = opts?.url
+        this.uri = res.url || opts?.url
         this.body = body || res.body.readAll();
         // res.body.readAll()
         this.pkgid = opts?.spec ? opts?.spec.toString() : packageName(opts?.url)
@@ -60,7 +60,7 @@ export class HttpErrorGeneral extends HttpErrorBase {
     spec: string
     constructor(
         method: string,
-        res: Class_HttpResponse,
+        res: INpmHttpResponse,
         body: IBodyError,
         opts: IErrorOpts
     ) {
@@ -77,7 +77,7 @@ export class HttpErrorGeneral extends HttpErrorBase {
 export class HttpErrorAuthOTP extends HttpErrorBase {
     constructor(
         method: string,
-        res: Class_HttpResponse,
+        res: INpmHttpResponse,
         body: IBodyError,
         opts: IErrorOpts
     ) {
@@ -92,7 +92,7 @@ export class HttpErrorAuthOTP extends HttpErrorBase {
 export class HttpErrorAuthIPAddress extends HttpErrorBase {
     constructor(
         method: string,
-        res: Class_HttpResponse,
+        res: INpmHttpResponse,
         body: IBodyError,
         opts: IErrorOpts
     ) {
@@ -107,7 +107,7 @@ export class HttpErrorAuthIPAddress extends HttpErrorBase {
 export class HttpErrorAuthUnknown extends HttpErrorBase {
     constructor(
         method: string,
-        res: Class_HttpResponse,
+        res: INpmHttpResponse,
         body: IBodyError,
         opts: IErrorOpts
     ) {
