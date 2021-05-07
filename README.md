@@ -25,3 +25,8 @@ Finally, start your development, change code and test it.
 ```bash
 lerna publish
 ```
+
+## TODO
+
+- [ ] support `retry` option for `fetch.json`
+- [ ] test to `registry.npmjs.org`
