@@ -3,8 +3,8 @@ test.setup();
 
 const Mod = require('../')
 
-describe("I:UserProfile", () => {
-    it("urls", () => {
+describe("FxLib", () => {
+    it("basic", () => {
         assert.ok(Mod.default === null)
     });
 });

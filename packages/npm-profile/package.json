@@ -1,14 +1,14 @@
 {
-	"name": "@fibpm/i-user-profile",
+	"name": "@fibpm/npm-profile",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/i-user-profile"
+		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/npm-profile"
 	},
-	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/i-user-profile",
+	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/npm-profile",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",

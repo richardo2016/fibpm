@@ -27,6 +27,10 @@ module.exports = [
         name: 'registry-fetch',
         _dirname: 'registry-fetch',
     },
+    {
+        name: 'npm-profile',
+        _dirname: 'npm-profile',
+    },
     /* internal module :start */
     {
         name: 'fibpm',
