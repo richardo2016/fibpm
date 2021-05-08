@@ -80,17 +80,21 @@ packages.forEach(({
       output = JSON.parse(output)
 
       if (existedTargetPkgJson.dependencies) {
-        output.dependencies =  {
+        output.dependencies = {
           ...existedTargetPkgJson.dependencies,
           ...output.dependencies,
         }
       }
 
       if (existedTargetPkgJson.devDependencies) {
-        output.devDependencies =  {
+        output.devDependencies = {
           ...existedTargetPkgJson.devDependencies,
           ...output.devDependencies,
         }
+      }
+
+      if (existedTargetPkgJson.version) {
+        output.version = existedTargetPkgJson.version
       }
 
       output = prettyJson(
