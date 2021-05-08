@@ -94,7 +94,7 @@ describe('errors', () => {
             .reply(400, { error: 'badarg' })
 
         try {
-            fetch('/ohno', OPTS, req => ms.receive(req))
+            fetch.jsonMock('/ohno', OPTS, req => ms.receive(req))
         } catch (err) {
             assert.equal(
                 err.message,
@@ -175,7 +175,7 @@ describe('errors', () => {
             })
 
         const otpPrompt = () => '12345'
-        const res = fetch('/otplease', { ...OPTS, otpPrompt, otp: '98765' }, req => ms.receive(req))
+        const res = fetch.mock('/otplease', { ...OPTS, otpPrompt, otp: '98765' }, req => ms.receive(req))
         assert.strictEqual(res.statusCode, 200)
 
         const body = res.json();

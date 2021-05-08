@@ -31,6 +31,8 @@ type IRegFetchOptions = Partial<IOptions>
     gzip?: boolean
     query?: object
     otpPrompt?: () => string
+
+    __mockResponse__?: MockServer | IMockResponse
 };
 type IMockResponse = (req: Class_HttpRequest) => void;
 /**
@@ -41,8 +43,7 @@ type IMockResponse = (req: Class_HttpRequest) => void;
  */
 function regFetch(
     uri: string,
-    opts_: IRegFetchOptions,
-    onRequest?: IMockResponse
+    opts_: IRegFetchOptions
 ): INpmHttpResponse {
     const opts = {
         ...defaultOpts,
@@ -115,7 +116,10 @@ function regFetch(
 
     let resp: INpmHttpResponse;
 
-    if (onRequest) {
+    if (opts_.__mockResponse__) {
+        const { __mockResponse__ } = opts_
+        const mockResponse: IMockResponse = __mockResponse__ instanceof MockServer ? req => __mockResponse__.receive(req) : __mockResponse__
+        
         httpRequest.method = opts.method;
         httpRequest.setHeader(headers);
         httpRequest.addHeader('HOST', parsed.hostname)
@@ -123,7 +127,7 @@ function regFetch(
         
         httpRequest.body.write(body as any);
 
-        onRequest(httpRequest);
+        mockResponse(httpRequest);
 
         resp = httpRequest.response as INpmHttpResponse;
     } else {
@@ -155,7 +159,7 @@ function regFetch(
             if (!otp)
                 throw error
 
-            return regFetch(uri, { ...opts, otp }, onRequest)
+            return regFetch(uri, { ...opts, otp })
         }
 
         throw error;
@@ -166,16 +170,16 @@ function regFetch(
 
 export = regFetch;
 
-regFetch.mock = (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => {
-    return regFetch(uri, opts, mockResponse instanceof MockServer ? req => mockResponse.receive(req) : mockResponse);
+regFetch.mock = (uri: string, opts: IRegFetchOptions, __mockResponse__: MockServer | IMockResponse) => {
+    return regFetch(uri, {...opts, __mockResponse__});
 }
 
 regFetch.json = (uri: string, opts: IRegFetchOptions) => {
   return regFetch(uri, opts).json();
 }
 
-regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => {
-    return regFetch.mock(uri, opts, mockResponse).json();
+regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, __mockResponse__: MockServer | IMockResponse) => {
+    return regFetch.mock(uri, opts, __mockResponse__).json();
 }
 
 /**

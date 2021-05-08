@@ -10,6 +10,7 @@ declare type IRegFetchOptions = Partial<IOptions> & Partial<IGetCacheModeOpts> &
     gzip?: boolean;
     query?: object;
     otpPrompt?: () => string;
+    __mockResponse__?: MockServer | IMockResponse;
 };
 declare type IMockResponse = (req: Class_HttpRequest) => void;
 /**
@@ -18,11 +19,11 @@ declare type IMockResponse = (req: Class_HttpRequest) => void;
  * @param opts_
  * @returns
  */
-declare function regFetch(uri: string, opts_: IRegFetchOptions, onRequest?: IMockResponse): INpmHttpResponse;
+declare function regFetch(uri: string, opts_: IRegFetchOptions): INpmHttpResponse;
 declare namespace regFetch {
-    var mock: (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => INpmHttpResponse;
+    var mock: (uri: string, opts: IRegFetchOptions, __mockResponse__: MockServer | IMockResponse) => INpmHttpResponse;
     var json: (uri: string, opts: IRegFetchOptions) => any;
-    var jsonMock: (uri: string, opts: IRegFetchOptions, mockResponse: MockServer | IMockResponse) => any;
+    var jsonMock: (uri: string, opts: IRegFetchOptions, __mockResponse__: MockServer | IMockResponse) => any;
     var pickRegistry: (_spec: ISpecInOptions, opts?: Record<string, string> & {
         scope?: string;
     }) => string;
