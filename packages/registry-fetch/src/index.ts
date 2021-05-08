@@ -6,7 +6,10 @@ import http = require('http')
 import qs = require('querystring')
 import url = require('url')
 import zlib = require('zlib')
+import ssl = require('ssl')
 import { MockServer } from './mock-server'
+
+ssl.loadRootCerts();
 
 import defaultOpts, { IOptions } from './default-opts';
 import { INpmHttpResponse, ISpecInOptions } from './_types';
@@ -17,7 +20,11 @@ const urlIsValid = (u: string) => {
     return !!(parsed.hostname && parsed.host)
 }
 
-type IRegFetchOptions = IOptions & IGetCacheModeOpts & {
+type IRegFetchOptions = Partial<IOptions>
+& Partial<IGetCacheModeOpts>
+& Partial<IGetHeadersOptions>
+& Partial<IGetAuthOpts>
+& {
     spec?: ISpecInOptions
     otp?: string
     body?: object
@@ -118,6 +125,7 @@ function regFetch(
         resp = httpRequest.response as INpmHttpResponse;
     } else {
         const client = new http.Client();
+        client.sslVerification = ssl.VERIFY_OPTIONAL;
         resp = client.request(opts.method, uri, {
             body,
             headers,
@@ -204,17 +212,19 @@ function getCacheMode(opts: IGetCacheModeOpts) {
                 : 'default'
 }
 
+type IGetHeadersOptions = {
+    headers?: Record<string, string>,
+    userAgent?: IOptions['userAgent'],
+    projectScope?: string
+    npmSession?: string
+    npmCommand?: string
+    otp?: string
+};
+
 function getHeaders(
     uri: string,
     auth: ReturnType<typeof getAuth>,
-    opts: {
-        headers?: Record<string, string>,
-        userAgent?: IOptions['userAgent'],
-        projectScope?: string
-        npmSession?: string
-        npmCommand?: string
-        otp?: string
-    }
+    opts: IGetHeadersOptions
 ) {
     const headers = Object.assign({
         'user-agent': opts.userAgent,

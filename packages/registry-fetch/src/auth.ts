@@ -13,11 +13,14 @@ import { IOptions } from './default-opts';
 
 /** @description specifiction of package, such as `foo@2.0.0` */
 type IPackageSpec = string
-type IKvs = Record<string, string>
+// type IKvs = Record<string, string>
+type IRegistryKey = `//${string}`
+type IRegistryAuthKVS = Record<IRegistryKey, string>
+type IScopeKey = `@${string}`
 
 // Find the longest registry key that is used for some kind of auth
 // in the options.
-function regKeyFromURI(uri: string, opts: IKvs) {
+function regKeyFromURI(uri: string, opts: IGetAuthOpts['forceAuth'] | IRegistryAuthKVS) {
     const parsed = url.parse(uri);
     // try to find a config key indicating we have auth for this registry
     // can be one of :_authToken, :_auth, or :_password and :username
@@ -35,7 +38,7 @@ function regKeyFromURI(uri: string, opts: IKvs) {
     }
 }
 
-const hasAuth = (regKey: string, opts: Record<string, string>) => (
+const hasAuth = (regKey: string, opts: Record<string, string | boolean>) => (
     opts[`${regKey}:_authToken`] ||
     opts[`${regKey}:_auth`] ||
     opts[`${regKey}:username`] && opts[`${regKey}:_password`]
@@ -47,22 +50,32 @@ const sameHost = (a: string, b: string) => {
     return parsedA.host === parsedB.host
 }
 
-const getRegistry = (opts: IKvs & {
+const getRegistry = (opts: {
     spec?: IPackageSpec,
     registry?: string,
-}) => {
+} & Record<IScopeKey, string>) => {
     const { spec } = opts
     const { scope: specScope, subSpec } = (spec ? npa(spec) : {}) as (Partial<npa.Result> & { subSpec?: { scope: string } })
     const subSpecScope = subSpec && subSpec.scope
     const scope = subSpec ? subSpecScope : specScope
-    const scopeReg = scope && opts[`${scope}:registry`]
+    const scopeReg = scope && (opts as any)[`${scope}:registry`]
     return scopeReg || opts.registry
 }
 
 export type IGetAuthOpts = {
     log?: IOptions['log']
-    forceAuth?: IKvs
-} & IKvs
+    registry?: IOptions['registry']
+    forceAuth?: {
+        username: string
+        _password?: string
+        password?: string
+        _authToken?: string
+        _auth?: string
+        auth?: string
+        otp?: string
+        'always-auth'?: boolean
+    }
+} & Record<IScopeKey, string>
 
 const getAuth = (uri: string, opts: IGetAuthOpts = {}): Auth => {
     const { forceAuth } = opts
@@ -101,7 +114,7 @@ const getAuth = (uri: string, opts: IGetAuthOpts = {}): Auth => {
         [`${regKey}:username`]: username,
         [`${regKey}:_password`]: password,
         [`${regKey}:_auth`]: auth,
-    } = opts
+    } = opts as any
 
     return new Auth({
         scopeAuthKey: null,

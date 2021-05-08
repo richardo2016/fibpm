@@ -1,8 +1,9 @@
 /// <reference types="@fibjs/types" />
+import { IGetAuthOpts } from './auth';
 import { MockServer } from './mock-server';
 import { IOptions } from './default-opts';
 import { INpmHttpResponse, ISpecInOptions } from './_types';
-declare type IRegFetchOptions = IOptions & IGetCacheModeOpts & {
+declare type IRegFetchOptions = Partial<IOptions> & Partial<IGetCacheModeOpts> & Partial<IGetHeadersOptions> & Partial<IGetAuthOpts> & {
     spec?: ISpecInOptions;
     otp?: string;
     body?: object;
@@ -31,4 +32,12 @@ declare type IGetCacheModeOpts = {
     offline?: boolean;
     preferOffline?: boolean;
     preferOnline?: boolean;
+};
+declare type IGetHeadersOptions = {
+    headers?: Record<string, string>;
+    userAgent?: IOptions['userAgent'];
+    projectScope?: string;
+    npmSession?: string;
+    npmCommand?: string;
+    otp?: string;
 };

@@ -1,9 +1,19 @@
 import { IOptions } from './default-opts';
-declare type IKvs = Record<string, string>;
+declare type IScopeKey = `@${string}`;
 export declare type IGetAuthOpts = {
     log?: IOptions['log'];
-    forceAuth?: IKvs;
-} & IKvs;
+    registry?: IOptions['registry'];
+    forceAuth?: {
+        username: string;
+        _password?: string;
+        password?: string;
+        _authToken?: string;
+        _auth?: string;
+        auth?: string;
+        otp?: string;
+        'always-auth'?: boolean;
+    };
+} & Record<IScopeKey, string>;
 declare const getAuth: (uri: string, opts?: IGetAuthOpts) => Auth;
 declare type IRequiredTuple = [
     {
