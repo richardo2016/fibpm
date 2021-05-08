@@ -1,14 +1,14 @@
 {
-	"name": "@fibpm/npm-profile",
+	"name": "@fibpm/idev-mock-server",
 	"version": "0.1.0",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/npm-profile"
+		"url": "https://github.com/richardo2016/fibpm/tree/master/packages/idev-mock-server"
 	},
-	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/npm-profile",
+	"homepage": "https://github.com/richardo2016/fibpm/tree/master/packages/idev-mock-server",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
@@ -19,7 +19,6 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@fibjs/types": "^0.31.0",
-		"@fibpm/idev-mock-server": "^0.1.0",
 		"fib-pool": "^1.6.0",
 		"fib-typify": "^0.9.0"
 	},
@@ -34,8 +33,5 @@
 			"0.30.0",
 			"0.31.0"
 		]
-	},
-	"dependencies": {
-		"@fibpm/registry-fetch": "^0.1.0"
 	}
 }

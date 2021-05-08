@@ -1,6 +1,6 @@
 /// <reference types="@fibjs/types" />
 import { IGetAuthOpts } from './auth';
-import { MockServer } from './mock-server';
+import { MockServer } from '@fibpm/idev-mock-server';
 import { IOptions } from './default-opts';
 import { INpmHttpResponse, ISpecInOptions } from './_types';
 declare type IRegFetchOptions = Partial<IOptions> & Partial<IGetCacheModeOpts> & Partial<IGetHeadersOptions> & Partial<IGetAuthOpts> & {

@@ -2,7 +2,7 @@ const test = require('test');
 test.setup();
 
 const npa = require('npm-package-arg')
-const { nock } = require('../lib/mock-server');
+const { nock } = require('@fibpm/idev-mock-server');
 const errors = require('../lib/errors.js')
 const { mockLog } = require('../lib/silentlog');
 

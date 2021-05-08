@@ -7,7 +7,7 @@ import qs = require('querystring')
 import url = require('url')
 import zlib = require('zlib')
 import ssl = require('ssl')
-import { MockServer } from './mock-server'
+import { MockServer } from '@fibpm/idev-mock-server'
 
 ssl.loadRootCerts();
 

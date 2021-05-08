@@ -4,10 +4,6 @@ module.exports = [
         _dirname: 'i-resolve-package',
     },
     {
-        name: 'i-user-profile',
-        _dirname: 'i-user-profile',
-    },
-    {
         name: 'i-resolve-registry',
         _dirname: 'i-resolve-registry',
     },
@@ -22,6 +18,10 @@ module.exports = [
     {
         name: 'i-tarball',
         _dirname: 'i-tarball',
+    },
+    {
+        name: 'idev-mock-server',
+        _dirname: 'idev-mock-server',
     },
     {
         name: 'registry-fetch',

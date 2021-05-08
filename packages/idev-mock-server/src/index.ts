@@ -20,7 +20,7 @@ type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
 /**
  * @see {@link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses}
  */
-const HTTP_STATUS_MESSAGE: {[p: number]: string} = {
+const HTTP_STATUS_MESSAGE: { [p: number]: string } = {
     200: 'OK',
     400: 'Bad Request',
     401: 'Unauthorized',
@@ -48,7 +48,7 @@ export class MockServer {
 
     constructor(hostBase: string) {
         const { hostname, path = '' } = url.parse(hostBase);
-        
+
         let obj: any
         if (path) {
             obj = new mq.Routing({
@@ -57,7 +57,7 @@ export class MockServer {
         } else {
             obj = this.subRoutings
         }
-        
+
         this.routing.host(hostname, obj as any);
     }
 
@@ -114,7 +114,7 @@ export class MockServer {
         return this._mount(path, 'POST');
     }
 
-    reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]) {        
+    reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]) {
         if (!this._lastRoute) {
             throw new Error(`[reply] no _lastRoute information! make you call '._mount' before call '.reply'`)
         }
@@ -137,7 +137,7 @@ export class MockServer {
                     } = {}
                 ] = params || [];
 
-                req.response.setHeader(headers);              
+                req.response.setHeader(headers);
                 req.response.statusCode = httpCode;
 
                 if (HTTP_STATUS_MESSAGE[httpCode]) {
@@ -145,7 +145,7 @@ export class MockServer {
                 } else {
                     throw new Error(`unsupport http status code ${httpCode}`);
                 }
-                
+
                 if (typeof body === 'string') {
                     req.response.body.write(Buffer.from(body))
                     if (json) {
@@ -169,8 +169,6 @@ export class MockServer {
     }
 }
 
-export function nock (hostBase: string) {
+export function nock(hostBase: string) {
     return new MockServer(hostBase);
 }
-
-

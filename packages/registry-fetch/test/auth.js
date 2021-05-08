@@ -3,7 +3,7 @@ test.setup();
 
 const getAuth = require('../lib/auth').default;
 
-const { nock } = require('../lib/mock-server');
+const { nock } = require('@fibpm/idev-mock-server');
 const fetch = require('../lib');
 const { mockLog } = require('../lib/silentlog');
 
