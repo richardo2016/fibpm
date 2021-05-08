@@ -1,4 +1,5 @@
 import { IOptions } from './default-opts';
+declare type IRegistryKey = `//${string}`;
 declare type IScopeKey = `@${string}`;
 export declare type IGetAuthOpts = {
     log?: IOptions['log'];
@@ -13,7 +14,7 @@ export declare type IGetAuthOpts = {
         otp?: string;
         'always-auth'?: boolean;
     };
-} & Record<IScopeKey, string>;
+} & Record<IScopeKey, string> & Record<IRegistryKey, string>;
 declare const getAuth: (uri: string, opts?: IGetAuthOpts) => Auth;
 declare type IRequiredTuple = [
     {

@@ -75,7 +75,7 @@ export type IGetAuthOpts = {
         otp?: string
         'always-auth'?: boolean
     }
-} & Record<IScopeKey, string>
+} & Record<IScopeKey, string> & Record<IRegistryKey, string>
 
 const getAuth = (uri: string, opts: IGetAuthOpts = {}): Auth => {
     const { forceAuth } = opts

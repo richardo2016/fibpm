@@ -72,7 +72,7 @@ function regFetch(
 
     // through that takes into account the scope, the prefix of `uri`, etc
     const startTime = Date.now()
-    const auth = getAuth(uri, opts as any)
+    const auth = getAuth(uri, opts)
     const headers = getHeaders(uri, auth, opts)
     let body: Class_Buffer | object | string = opts.body
 
@@ -98,7 +98,10 @@ function regFetch(
             if (q[key] !== undefined)
                 parsed.searchParams.set(key, q[key])
         })
-        uri = url.format(parsed)
+
+        uri = url.format(
+            JSON.parse(JSON.stringify(parsed))
+        )
     }
 
     if (parsed.searchParams.first('write') === 'true' && method === 'GET') {
