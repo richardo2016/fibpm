@@ -20,7 +20,7 @@
 	"devDependencies": {
 		"@fibjs/types": "^0.31.0",
 		"fib-pool": "^1.6.0",
-		"fib-typify": "^0.8.3"
+		"fib-typify": "^0.9.0"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -33,5 +33,8 @@
 			"0.30.0",
 			"0.31.0"
 		]
+	},
+	"dependencies": {
+		"@fibpm/registry-fetch": "^0.1.0"
 	}
 }
