@@ -41,7 +41,7 @@ export class HttpErrorBase extends Error {
         method: string,
         res: INpmHttpResponse,
         body: IBodyError,
-        opts: IErrorOpts
+        opts?: IErrorOpts
     ) {
         super()
         this.name = this.constructor.name

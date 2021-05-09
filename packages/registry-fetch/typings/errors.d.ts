@@ -16,7 +16,7 @@ export declare class HttpErrorBase extends Error {
     uri: string;
     body: Class_Buffer | IBodyError;
     pkgid: string;
-    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts: IErrorOpts);
+    constructor(method: string, res: INpmHttpResponse, body: IBodyError, opts?: IErrorOpts);
 }
 export declare class HttpErrorGeneral extends HttpErrorBase {
     spec: string;

@@ -7,7 +7,7 @@
  * @desc one mock server, inspired by `nock`
  */
 /// <reference types="@fibjs/types" />
-declare type IHttpVerb = 'GET' | 'POST' | 'PUT' | 'PATCH';
+declare type IHttpVerb = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 declare type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 declare type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
 declare type IMockServerReplyFunc = (httpCode: Class_HttpResponse['statusCode'], body: string | object, headers?: Record<string, string>, options?: {
@@ -34,6 +34,9 @@ export declare class MockServer {
     matchHeader(key: string, valueOrGetValue: string | IMatchHeaderFunc): this;
     get(path: string): this;
     post(path: string): this;
+    put(path: string): this;
+    patch(path: string): this;
+    delete(path: string): this;
     reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]): this;
 }
 export declare function nock(hostBase: string): MockServer;

@@ -1,113 +1,144 @@
 'use strict'
 
 import fetch = require('@fibpm/registry-fetch')
-const { HttpErrorBase } = require('@fibpm/registry-fetch/lib/errors')
+import { INpmHttpResponse } from '@fibpm/registry-fetch/typings/_types'
+import { errors } from '@fibpm/registry-fetch';
+const { HttpErrorBase } = errors
 import os = require('os')
-// import { URL } = require('url')
+import url = require('url')
+import http = require('http')
+import coroutine = require('coroutine')
 
-type IRegFetchOptions = Parameters<typeof fetch>[1]
+type IRegFetchOptions = Parameters<typeof fetch>[1] & {
+    creds?: {
+        username: string
+        password: string
+        email: string
+    }
+}
 
-// // try loginWeb, catch the "not supported" message and fall back to couch
-// export const login = (opener, prompter, opts = {}) => {
-//   const { creds } = opts
-//   return loginWeb(opener, opts).catch(er => {
-//     if (er instanceof WebLoginNotSupported) {
-//       process.emit('log', 'verbose', 'web login not supported, trying couch')
-//       return prompter(creds)
-//         .then(data => loginCouch(data.username, data.password, opts))
-//     } else {
-//       throw er
-//     }
-//   })
-// }
+type IPrompter = (creds: IRegFetchOptions['creds']) => IRegFetchOptions['creds']
+// try loginWeb, catch the "not supported" message and fall back to couch
+export const login = (
+    opener: string,
+    prompter: IPrompter,
+    opts: IRegFetchOptions = {}
+) => {
+    const { creds } = opts
+    try {
+        return loginWeb(opener, opts)
+    } catch (er) {
+        if (er instanceof WebLoginNotSupported) {
+            //   process.emit('log', 'verbose', 'web login not supported, trying couch')
+            const data = prompter(creds)
 
-// export const adduser = (opener, prompter, opts = {}) => {
-//   const { creds } = opts
-//   return adduserWeb(opener, opts).catch(er => {
-//     if (er instanceof WebLoginNotSupported) {
-//       process.emit('log', 'verbose', 'web adduser not supported, trying couch')
-//       return prompter(creds)
-//         .then(data => adduserCouch(data.username, data.email, data.password, opts))
-//     } else {
-//       throw er
-//     }
-//   })
-// }
+            return loginCouch(data.username, data.password, opts)
+        } else {
+            throw er
+        }
+    }
+}
 
-// export const adduserWeb = (opener, opts = {}) => {
-//   process.emit('log', 'verbose', 'web adduser', 'before first POST')
-//   return webAuth(opener, opts, { create: true })
-// }
+export const adduser = (opener: IOpener, prompter: IPrompter, opts: IRegFetchOptions = {}) => {
+    const { creds } = opts
+    try {
+        return adduserWeb(opener, opts)
+    } catch (er) {
+        if (er instanceof WebLoginNotSupported) {
+            // process.emit('log', 'verbose', 'web adduser not supported, trying couch')
+            const data = prompter(creds)
 
-// export const loginWeb = (opener, opts = {}) => {
-//   process.emit('log', 'verbose', 'web login', 'before first POST')
-//   return webAuth(opener, opts, {})
-// }
+            return adduserCouch(data.username, data.email, data.password, opts)
+        } else {
+            throw er
+        }
+    }
+}
 
-// const isValidUrl = u => {
-//   try {
-//     return /^https?:$/.test(new URL(u).protocol)
-//   } catch (er) {
-//     return false
-//   }
-// }
+export const adduserWeb = (opener: IOpener, opts: IRegFetchOptions = {}) => {
+    // process.emit('log', 'verbose', 'web adduser', 'before first POST')
+    return webAuth(opener, opts, { create: true })
+}
 
-// const webAuth = (opener, opts, body) => {
-//   const { hostname } = opts
-//   body.hostname = hostname || os.hostname()
-//   const target = '/-/v1/login'
-//   return fetch(target, {
-//     ...opts,
-//     method: 'POST',
-//     body
-//   }).then(res => {
-//     return Promise.all([res, res.json()])
-//   }).then(([res, content]) => {
-//     const { doneUrl, loginUrl } = content
-//     process.emit('log', 'verbose', 'web auth', 'got response', content)
-//     if (!isValidUrl(doneUrl) || !isValidUrl(loginUrl)) {
-//       throw new WebLoginInvalidResponse('POST', res, content)
-//     }
-//     return content
-//   }).then(({ doneUrl, loginUrl }) => {
-//     process.emit('log', 'verbose', 'web auth', 'opening url pair')
-//     return opener(loginUrl).then(
-//       () => webAuthCheckLogin(doneUrl, { ...opts, cache: false })
-//     )
-//   }).catch(er => {
-//     if ((er.statusCode >= 400 && er.statusCode <= 499) || er.statusCode === 500) {
-//       throw new WebLoginNotSupported('POST', {
-//         status: er.statusCode,
-//         headers: { raw: () => er.headers }
-//       }, er.body)
-//     } else {
-//       throw er
-//     }
-//   })
-// }
+export const loginWeb = (opener: any, opts: IRegFetchOptions = {}) => {
+    // process.emit('log', 'verbose', 'web login', 'before first POST')
+    return webAuth(opener, opts, {})
+}
 
-// const webAuthCheckLogin = (doneUrl, opts) => {
-//   return fetch(doneUrl, opts).then(res => {
-//     return Promise.all([res, res.json()])
-//   }).then(([res, content]) => {
-//     if (res.status === 200) {
-//       if (!content.token) {
-//         throw new WebLoginInvalidResponse('GET', res, content)
-//       } else {
-//         return content
-//       }
-//     } else if (res.status === 202) {
-//       const retry = +res.headers.get('retry-after') * 1000
-//       if (retry > 0) {
-//         return sleep(retry).then(() => webAuthCheckLogin(doneUrl, opts))
-//       } else {
-//         return webAuthCheckLogin(doneUrl, opts)
-//       }
-//     } else {
-//       throw new WebLoginInvalidResponse('GET', res, content)
-//     }
-//   })
-// }
+const isValidUrl = (u: string) => {
+    try {
+        return /^https?:$/.test(url.parse(u).protocol)
+    } catch (er) {
+        return false
+    }
+}
+
+type IOpener = any;
+const webAuth = (opener: IOpener, opts: IRegFetchOptions & {
+    hostname?: string
+}, body: Record<string, any>) => {
+    const { hostname } = opts
+    body.hostname = hostname || os.hostname()
+
+    try {
+        const target = '/-/v1/login'
+        let res = fetch(target, {
+            ...opts,
+            method: 'POST',
+            body
+        })
+
+        const content = res.json();
+
+        const { doneUrl, loginUrl } = content
+        // process.emit('log', 'verbose', 'web auth', 'got response', content)
+        if (!isValidUrl(doneUrl) || !isValidUrl(loginUrl)) {
+            throw new WebLoginInvalidResponse('POST', res, content)
+        }
+
+        // process.emit('log', 'verbose', 'web auth', 'opening url pair')
+
+        opener(loginUrl);
+        return webAuthCheckLogin(doneUrl, { ...opts, cache: false });
+    } catch (er) {
+        // console.log('[webAuth] er is', er);
+        // console.log('[webAuth] er.body is', er.body);
+
+        if ((er.statusCode >= 400 && er.statusCode <= 499) || er.statusCode === 500) {
+            const resp = new http.Response() as INpmHttpResponse;
+
+            resp.statusCode = er.statusCode
+            resp.setHeader(er.headers);
+
+            throw new WebLoginNotSupported('POST', resp, er.body)
+        } else {
+            throw er
+        }
+    }
+}
+
+const webAuthCheckLogin = <T = any>(doneUrl: string, opts: IRegFetchOptions): T => {
+    const res = fetch(doneUrl, opts);
+
+    const content = res.json();
+
+    if (res.statusCode === 200) {
+        if (!content.token) {
+            throw new WebLoginInvalidResponse('GET', res, content)
+        } else {
+            return content
+        }
+    } else if (res.statusCode === 202) {
+        const retry = +res.headers.first('retry-after') * 1000
+        if (retry > 0) {
+            sleep(retry);
+        }
+
+        return webAuthCheckLogin(doneUrl, opts);
+    } else {
+        throw new WebLoginInvalidResponse('GET', res, content)
+    }
+}
 
 export const adduserCouch = (
     username: string,
@@ -216,57 +247,65 @@ export const set = (profile: Record<string, string>, opts: IRegFetchOptions = {}
     })
 }
 
-// export const listTokens = (opts = {}) => {
-//   const untilLastPage = (href, objects) => {
-//     return fetch.json(href, opts).then(result => {
-//       objects = objects ? objects.concat(result.objects) : result.objects
-//       if (result.urls.next) {
-//         return untilLastPage(result.urls.next, objects)
-//       } else {
-//         return objects
-//       }
-//     })
-//   }
-//   return untilLastPage('/-/npm/v1/tokens')
-// }
+export const listTokens = (opts: IRegFetchOptions = {}) => {
+    const untilLastPage = (href: string, objects?: object[]): object[] => {
+        const result = fetch.json(href, opts);
 
-// export const removeToken = (tokenKey, opts = {}) => {
-//   const target = `/-/npm/v1/tokens/token/${tokenKey}`
-//   return fetch(target, {
-//     ...opts,
-//     method: 'DELETE',
-//     ignoreBody: true
-//   }).then(() => null)
-// }
+        objects = objects ? objects.concat(result.objects) : result.objects
+        if (result.urls.next) {
+            return untilLastPage(result.urls.next, objects)
+        } else {
+            return objects
+        }
+    }
+    return untilLastPage('/-/npm/v1/tokens')
+}
 
-// export const createToken = (password, readonly, cidrs, opts = {}) => {
-//   return fetch.json('/-/npm/v1/tokens', {
-//     ...opts,
-//     method: 'POST',
-//     body: {
-//       password: password,
-//       readonly: readonly,
-//       cidr_whitelist: cidrs
-//     }
-//   })
-// }
+export const removeToken = (tokenKey: string, opts: IRegFetchOptions = {}): null => {
+    const target = `/-/npm/v1/tokens/token/${tokenKey}`
+    fetch(target, {
+        ...opts,
+        method: 'DELETE',
+        ignoreBody: true
+    })
 
-// class WebLoginInvalidResponse extends HttpErrorBase {
-//   constructor (method, res, body) {
-//     super(method, res, body)
-//     this.message = 'Invalid response from web login endpoint'
-//     Error.captureStackTrace(this, WebLoginInvalidResponse)
-//   }
-// }
+    return null;
+}
 
-// class WebLoginNotSupported extends HttpErrorBase {
-//   constructor (method, res, body) {
-//     super(method, res, body)
-//     this.message = 'Web login not supported'
-//     this.code = 'ENYI'
-//     Error.captureStackTrace(this, WebLoginNotSupported)
-//   }
-// }
+export const createToken = (password: string, readonly?: boolean, cidrs?: object[], opts = {}) => {
+    return fetch.json('/-/npm/v1/tokens', {
+        ...opts,
+        method: 'POST',
+        body: {
+            password: password,
+            readonly: readonly,
+            cidr_whitelist: cidrs
+        }
+    })
+}
 
-// const sleep = (ms) =>
-//   new Promise((resolve, reject) => setTimeout(resolve, ms))
+class WebLoginInvalidResponse extends HttpErrorBase {
+    constructor(...args: ConstcutorParamters<typeof errors.HttpErrorBase>) {
+        super(...args);
+
+        this.message = 'Invalid response from web login endpoint'
+            ; (Error as any).captureStackTrace(this, WebLoginInvalidResponse)
+    }
+}
+
+type ConstcutorParamters<T> = T extends {
+    new(...args: infer U): void;
+} ? U : never
+class WebLoginNotSupported extends errors.HttpErrorBase {
+    constructor(...args: ConstcutorParamters<typeof errors.HttpErrorBase>) {
+        super(...args)
+        this.message = 'Web login not supported'
+        this.code = 'ENYI';
+
+        ; (Error as any).captureStackTrace(this, WebLoginNotSupported)
+    }
+}
+
+const sleep = (ms: number) => {
+    coroutine.sleep(ms);
+}

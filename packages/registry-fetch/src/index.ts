@@ -1,4 +1,5 @@
 import { HttpErrorAuthOTP } from './errors'
+import errors = require('./errors');
 import checkResponse = require('./check-response')
 import getAuth, { IGetAuthOpts } from './auth';
 import npa = require('npm-package-arg')
@@ -8,11 +9,10 @@ import url = require('url')
 import zlib = require('zlib')
 import ssl = require('ssl')
 import { MockServer } from '@fibpm/idev-mock-server'
-
-ssl.loadRootCerts();
-
 import defaultOpts, { IOptions } from './default-opts';
 import { INpmHttpResponse, ISpecInOptions } from './_types';
+
+ssl.loadRootCerts();
 
 // check if request url valid
 const urlIsValid = (u: string) => {
@@ -31,6 +31,8 @@ type IRegFetchOptions = Partial<IOptions>
     gzip?: boolean
     query?: object
     otpPrompt?: () => string
+    cache?: boolean
+    ignoreBody?: boolean
 
     __mockResponse__?: MockServer | IMockResponse
 };
@@ -181,6 +183,8 @@ regFetch.json = (uri: string, opts: IRegFetchOptions) => {
 regFetch.jsonMock = (uri: string, opts: IRegFetchOptions, __mockResponse__: MockServer | IMockResponse) => {
     return regFetch.mock(uri, opts, __mockResponse__).json();
 }
+
+regFetch.errors = errors;
 
 /**
  * @description pick registry for spec from npm configuration

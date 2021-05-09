@@ -10,8 +10,8 @@
 import url = require('url');
 import mq = require('mq');
 
-type IHttpVerb = 'GET' | 'POST' | 'PUT' | 'PATCH';
-type IRoutingMethod = 'get' | 'post' | 'put' | 'patch';
+type IHttpVerb = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type IRoutingMethod =  Lowercase<IHttpVerb>
 
 type IRouteList = ((req: Class_HttpRequest) => any | Class_Handler)[];
 
@@ -22,8 +22,18 @@ type IMatchHeaderFunc = (headerValues: string[] | null) => boolean;
  */
 const HTTP_STATUS_MESSAGE: { [p: number]: string } = {
     200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    203: 'Non-Authoritative Information',
+    204: 'No Content',
+    205: 'Reset Content',
+    206: 'Partial Content',
+    207: 'Multi-Status',
+    208: 'Already Reported',
+    226: 'IM Used',
     400: 'Bad Request',
     401: 'Unauthorized',
+    404: 'Not Found',
 }
 
 type IMockServerReplyFunc = (
@@ -114,6 +124,18 @@ export class MockServer {
         return this._mount(path, 'POST');
     }
 
+    put(path: string) {
+        return this._mount(path, 'PUT');
+    }
+
+    patch(path: string) {
+        return this._mount(path, 'PATCH');
+    }
+
+    delete(path: string) {
+        return this._mount(path, 'DELETE');
+    }
+
     reply(...args: IMockServerReplyParams | [IMockServerReplyFunc]) {
         if (!this._lastRoute) {
             throw new Error(`[reply] no _lastRoute information! make you call '._mount' before call '.reply'`)
@@ -123,7 +145,8 @@ export class MockServer {
             (req: Class_HttpRequest) => {
                 let params: IMockServerReplyParams
                 if (typeof args[0] === 'function') {
-                    params = args[0].apply(null, [req]);
+                    const funcCtx = { req };
+                    params = args[0].apply(funcCtx, [req]);
                 } else {
                     params = args as IMockServerReplyParams;
                 }
@@ -161,7 +184,11 @@ export class MockServer {
 
         const method = this._lastRoute.method.toLowerCase() as IRoutingMethod;// as Lowercase<IHttpVerb>;
 
-        this.subRoutings[method](this._lastRoute.path, this._lastRoute.routes as any);
+        if (method === 'delete') {
+            this.subRoutings.del(this._lastRoute.path, this._lastRoute.routes as any);
+        } else {
+            this.subRoutings[method](this._lastRoute.path, this._lastRoute.routes as any);
+        }
 
         this._lastRoute = null;
 
