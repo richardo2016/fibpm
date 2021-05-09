@@ -20,6 +20,7 @@
 	"devDependencies": {
 		"@fibjs/types": "^0.31.0",
 		"@fibpm/idev-mock-server": "^0.1.0",
+		"@fibpm/idev-tsuites": "^0.1.0",
 		"fib-pool": "^1.6.0",
 		"fib-typify": "^0.9.0"
 	},

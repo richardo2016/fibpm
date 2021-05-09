@@ -24,6 +24,10 @@ module.exports = [
         _dirname: 'idev-mock-server',
     },
     {
+        name: 'idev-tsuites',
+        _dirname: 'idev-tsuites',
+    },
+    {
         name: 'registry-fetch',
         _dirname: 'registry-fetch',
     },

@@ -2,6 +2,7 @@ const util = require('util')
 const profile = require('../lib')
 
 const { nock } = require('@fibpm/idev-mock-server');
+const { Helpers } = require('@fibpm/idev-tsuites')
 
 // function tnock(host) {
 //     const server = nock(host)
@@ -10,32 +11,6 @@ const { nock } = require('@fibpm/idev-mock-server');
 //     })
 //     return server
 // }
-
-function shouldFail(runner) {
-    let error
-    try {
-        runner();
-    } catch (err) {
-        error = err;
-    }
-
-    assert.ok(error instanceof Error);
-
-    /**
-     * @param {(err: Error) => any} func
-     */
-    return (func) => func(error)
-}
-
-function assertLike(obj1, obj2) {
-    const keys = Object.keys(obj2);
-
-    assert.deepEqual(util.pick(obj1, keys), obj2);
-}
-
-function assertMatch(input, regexp) {
-    assert.isTrue(regexp.test(input));
-}
 
 const registry = 'https://registry.npmjs.org/'
 
@@ -49,7 +24,7 @@ describe('mock', () => {
             return [auth ? 200 : 401, '', {}]
         })
 
-        shouldFail(() => {
+        Helpers.shouldFail(() => {
             profile.get({ __mockResponse__: srv });
         })(err => {
             assert.equal(err.code, 'E401')
@@ -64,12 +39,12 @@ describe('mock', () => {
 
         var result = profile.get({ '//registry.npmjs.org/:_authToken': 'deadbeef', __mockResponse__: srv });
 
-        assertLike(result, { auth: 'bearer' });
+        Helpers.assertLike(result, { auth: 'bearer' });
 
         var srv = nock(registry)
         srv.get(getUrl).reply(function () {
             const auth = this.req.headers.all('authorization')
-            assertMatch(auth[0], /^Basic /, 'got basic auth')
+            Helpers.assertMatch(auth[0], /^Basic /, 'got basic auth')
             const [username, password] = Buffer.from(
                 auth[0].match(/^Basic (.*)$/)[1], 'base64'
             ).toString('utf8').split(':')
@@ -86,7 +61,7 @@ describe('mock', () => {
             __mockResponse__: srv
         })
 
-        assertLike(result, { auth: 'basic' });
+        Helpers.assertLike(result, { auth: 'basic' });
 
         var srv = nock(registry)
         srv.get(getUrl).reply(function () {
@@ -103,7 +78,7 @@ describe('mock', () => {
             __mockResponse__: srv
         })
 
-        assertLike(result, { auth: 'bearer', otp: true })
+        Helpers.assertLike(result, { auth: 'bearer', otp: true })
         // with otp, with token, with basic
         // prob should make w/o token 401
     })
@@ -258,7 +233,7 @@ describe('mock', () => {
             t.fail('called opener', { url })
         };
 
-        shouldFail(() => {
+        Helpers.shouldFail(() => {
             profile.adduserWeb(opener, { __mockResponse__: srv })
         })((err) => {
             assert.equal(err.message, 'Web login not supported')
@@ -274,7 +249,7 @@ describe('mock', () => {
             t.fail('called opener', { url })
         }
 
-        shouldFail(() => {
+        Helpers.shouldFail(() => {
             profile.loginWeb(opener, { __mockResponse__: srv })
         })(err => {
             assert.equal(err.message, 'Web login not supported')
