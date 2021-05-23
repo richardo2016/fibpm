@@ -23,3 +23,35 @@ export function assertLike(obj1: object, obj2: object) {
 export function assertMatch(input: string, regexp: RegExp) {
     assert.isTrue(regexp.test(input));
 }
+
+export function runAndReturnError (fnt: Function) {
+    let err;
+
+    try {
+        fnt();
+    } catch (error) {
+        err = error 
+    }
+
+    return err;
+}
+
+export function assertThrowError (fnt: Function, regExp: string | RegExp) {
+    const err = runAndReturnError(fnt);
+
+    assert.isTrue(err instanceof Error);
+    
+    if (regExp instanceof RegExp) {
+        assert.isTrue(regExp.test(err.message))
+    } else if (typeof regExp === 'string') {
+        assert.isTrue(err.message.includes(regExp))
+    }
+}
+
+
+export function doesNotThrow (fnt: Function) {
+    const err = runAndReturnError(fnt);
+
+    assert.equal(err, undefined);
+}
+
