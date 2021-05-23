@@ -5,7 +5,7 @@ const Mod = require('../')
 
 describe("FxLib", () => {
     it("basic", () => {
-        assert.ok(Mod.default === null)
+        assert.isObject(Mod.Helpers)
     });
 });
 
