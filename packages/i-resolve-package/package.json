@@ -36,5 +36,9 @@
 	},
 	"dependencies": {
 		"semver": "^7.3.2"
-	}
+	},
+	"files": [
+		"lib",
+		"typings"
+	]
 }

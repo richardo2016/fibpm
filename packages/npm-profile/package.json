@@ -38,5 +38,9 @@
 	},
 	"dependencies": {
 		"@fibpm/registry-fetch": "^0.1.0"
-	}
+	},
+	"files": [
+		"lib",
+		"typings"
+	]
 }

@@ -15,6 +15,10 @@
     "ci": "npm run build && npm run test",
     "prepublishOnly": "npm run ci"
   },
+  "files": [
+    "lib",
+    "typings"
+  ],
   "author": "richardo2016 <richardo2016@gmail.com>",
   "license": "ISC",
   "devDependencies": {

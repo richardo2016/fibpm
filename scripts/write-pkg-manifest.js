@@ -35,6 +35,7 @@ const prettyJson = (content) => {
 
 packages.forEach(({
   name: comname,
+  no_publish,
   isTopPackage,
   _dirname,
 }) => {
@@ -73,6 +74,9 @@ packages.forEach(({
         git_path: monoInfo.gitPath || `${monoscope}/${monoName}`,
         mono_path: `packages/${comPkgname}`,
         isTopPackage,
+      },
+      buildmeta: {
+        no_publish
       }
     })
 
@@ -80,14 +84,14 @@ packages.forEach(({
       output = JSON.parse(output)
 
       if (existedTargetPkgJson.dependencies) {
-        output.dependencies = {
+        output.dependencies =  {
           ...existedTargetPkgJson.dependencies,
           ...output.dependencies,
         }
       }
 
       if (existedTargetPkgJson.devDependencies) {
-        output.devDependencies = {
+        output.devDependencies =  {
           ...existedTargetPkgJson.devDependencies,
           ...output.devDependencies,
         }
@@ -95,6 +99,13 @@ packages.forEach(({
 
       output.version = existedTargetPkgJson.version || output.version
       output.description = existedTargetPkgJson.description || output.description
+
+      if (existedTargetPkgJson.files) {
+        output.files = Array.from(new Set([
+          ...existedTargetPkgJson.files,
+          ...output.files,
+        ]));
+      }
 
       output = prettyJson(
         Object.assign({}, existedTargetPkgJson, output)

@@ -39,5 +39,9 @@
 	"dependencies": {
 		"@types/npm-package-arg": "^6.1.0",
 		"npm-package-arg": "^8.1.2"
-	}
+	},
+	"files": [
+		"lib",
+		"typings"
+	]
 }
