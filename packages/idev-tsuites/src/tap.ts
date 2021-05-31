@@ -19,7 +19,7 @@ type ICBO = {
     done(): void
 }
 export const test = (test_desc: string, fn: (cbo?: ICBO) => void) => {
-    _test.describe(test_desc, (_done) => {
+    _test.describe(test_desc, (_done: Function) => {
         const cbo = {
             equal: wrapAssertWithItDesc(_assert.equal),
 
