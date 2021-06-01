@@ -35,6 +35,14 @@ module.exports = [
         name: 'npm-profile',
         _dirname: 'npm-profile',
     },
+    {
+        name: 'pacote',
+        _dirname: 'pacote',
+    },
+    {
+        name: 'ssri',
+        _dirname: 'ssri',
+    },
     /* internal module :start */
     {
         name: 'fibpm',
