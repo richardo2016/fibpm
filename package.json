@@ -7,13 +7,20 @@
   "private": true,
   "scripts": {
     "build": "lerna run build",
-    "ci": "lerna run ci",
+    "ci": "lerna bootstrap && lerna exec -- npm run ci",
     "update-pkg": "fibjs ./scripts/write-pkg-manifest.js"
   },
   "devDependencies": {
+    "@fibjs/ci": "^2.4.2",
     "@fibjs/fs-readdir-recursive": "^1.0.2",
     "@fibjs/mkdirp": "^1.0.1",
     "ejs": "^3.0.2",
     "lerna": "^3.20.2"
+  },
+  "ci": {
+    "type": "actions",
+    "version": [
+      "0.33.0"
+    ]
   }
 }
