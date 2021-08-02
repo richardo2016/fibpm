@@ -1,20 +1,40 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const io = require('io');
 
 const PROJ_ROOT = path.resolve(__dirname, '../');
 const fpm = path.resolve(PROJ_ROOT, './bin/fpm.js');
 
 const exe = process.execPath;
 
+function runProcess (...args) {
+    if (process.run) {
+        return process.run(...args);
+    }
+
+    return require('child_process').run(...args);
+}
+
+function openProcess (...args) {
+    if (process.open) {
+        return process.open(...args);
+    }
+
+    return require('child_process').spawn(...args);
+}
+
 exports.openFpmCommnd = function (cmd, ...args) {
-    const subprocess = process.open(exe, [
+    const subprocess = openProcess(exe, [
         fpm,
         cmd,
         ...args
     ])
 
-    return subprocess;
+    return {
+        stdout: new io.BufferedStream(subprocess.stdout),
+        stderr: new io.BufferedStream(subprocess.stderr),
+    };
 }
 
 function normalize2UnixEOL (content = '') {
@@ -22,17 +42,17 @@ function normalize2UnixEOL (content = '') {
 }
 
 exports.readFromFpmCommand = function (cmd, ...args) {
-    const subprocess = exports.openFpmCommnd(cmd, ...args);
+    const { stdout } = exports.openFpmCommnd(cmd, ...args);
 
     return normalize2UnixEOL(
-        subprocess.stdout.readLines()
+        stdout.readLines()
         .map(x => x.trimEnd())
         .join(os.EOL)
     )
 }
 
 exports.runFpmCommnd = function (cmd, ...args) {
-    const subprocess = process.run(exe, [
+    const subprocess = runProcess(exe, [
         fpm,
         cmd,
         ...args

@@ -5,7 +5,8 @@ const Mod = require('../')
 
 describe("FxLib", () => {
     it("basic", () => {
-        assert.ok(Mod.default === null)
+        assert.isFunction(Mod.MockServer)
+        assert.isFunction(Mod.nock)
     });
 });
 
