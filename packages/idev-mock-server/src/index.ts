@@ -107,7 +107,7 @@ export class MockServer {
         const conf = this._getLastRouteConf()
 
         conf.routes.push((req) => {
-            const headers = req.headers.all(key);
+            const headers = req.headers.all(key) as string[];
             if (!func(headers.length ? headers : null)) {
                 req.end();
             }
